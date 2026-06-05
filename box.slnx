@@ -1,2 +1,13 @@
 <Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/box-bottom/">
+    <Project Path="src/box-bottom/BoxBottom.Aspire.ServiceDefaults/BoxBottom.Aspire.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/box-top/">
+    <Project Path="src/box-top/BoxTop.Aspire/BoxTop.Aspire.csproj" />
+    <Project Path="src/box-top/BoxTop.Web/BoxTop.Web.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
 </Solution>
