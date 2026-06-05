@@ -9,7 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\box-content\Foo.Primary.Api\Foo.Primary.Api.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Aspire.Orchestration\BoxBottom.Aspire.Orchestration.csproj">
+      <IsAspireProjectResource>false</IsAspireProjectResource>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
