@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "Foo.Secondary.Api.Grpc";
+
+package box;
+
+service World {
+  rpc GetWorld (GetWorldRequest) returns (GetWorldReply);
+}
+
+message GetWorldRequest {}
+
+message GetWorldReply {
+  string message = 1;
+}

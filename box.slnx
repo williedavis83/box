@@ -3,6 +3,7 @@
   <Folder Name="/src/box-bottom/">
     <Project Path="src/box-bottom/BoxBottom.Aspire.Orchestration/BoxBottom.Aspire.Orchestration.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Aspire.ServiceDefaults/BoxBottom.Aspire.ServiceDefaults.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Dapr/BoxBottom.Dapr.csproj" />
   </Folder>
   <Folder Name="/src/box-content/">
     <Project Path="src/box-content/Foo.Primary.Api/Foo.Primary.Api.csproj" />

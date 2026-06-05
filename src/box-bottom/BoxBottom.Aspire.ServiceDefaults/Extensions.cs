@@ -1,5 +1,7 @@
+using BoxBottom.Dapr;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
@@ -21,11 +23,16 @@ public static class Extensions
 
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
+        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
+        builder.AddDaprGrpcAppChannel();
 
         builder.Services.AddServiceDiscovery();
+        builder.Services.AddDaprClient();
+        builder.Services.AddSingleton<IDaprGrpcInvokerFactory, DaprGrpcInvokerFactory>();
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
@@ -41,6 +48,30 @@ public static class Extensions
         // {
         //     options.AllowedSchemes = ["https"];
         // });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Configures Kestrel for Dapr h2c gRPC app channels when <c>GRPC_ONLY_APP_CHANNEL</c> is enabled.
+    /// </summary>
+    public static TBuilder AddDaprGrpcAppChannel<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    {
+        if (!string.Equals(
+                builder.Configuration["GRPC_ONLY_APP_CHANNEL"],
+                "true",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return builder;
+        }
+
+        builder.Services.Configure<KestrelServerOptions>(options =>
+        {
+            options.ConfigureEndpointDefaults(listenOptions =>
+            {
+                listenOptions.Protocols = HttpProtocols.Http2;
+            });
+        });
 
         return builder;
     }

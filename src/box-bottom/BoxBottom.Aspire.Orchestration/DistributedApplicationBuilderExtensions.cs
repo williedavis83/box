@@ -1,11 +1,14 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using CommunityToolkit.Aspire.Hosting.Dapr;
 
 namespace BoxBottom.Aspire.Orchestration;
 
 public static class DistributedApplicationBuilderExtensions
 {
     private const string HostingStartupAssembliesKey = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
+    private const string DaprComponentsPath = "../../dapr/components";
+    private const string DaprConfigPath = "../../dapr/config.yaml";
 
     /// <summary>
     /// Adds a .NET API project and applies standard Aspire configuration, including Scalar dashboard links.
@@ -14,23 +17,48 @@ public static class DistributedApplicationBuilderExtensions
         this IDistributedApplicationBuilder builder,
         string name,
         string projectPath,
-        string aspNetEnvironment = "Development")
+        string aspNetEnvironment = "Development",
+        bool grpcOnlyAppChannel = false)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(projectPath);
 
-        return builder.AddProject(name, projectPath, options =>
+        var daprSidecarOptions = new DaprSidecarOptions
+        {
+            AppId = name,
+            Config = DaprConfigPath,
+            ResourcesPaths = [DaprComponentsPath],
+            AppChannelAddress = grpcOnlyAppChannel ? "127.0.0.1" : null,
+            AppEndpoint = grpcOnlyAppChannel ? "http" : null,
+            AppProtocol = grpcOnlyAppChannel ? "h2c" : null,
+        };
+
+        var api = builder.AddProject(name, projectPath, options =>
             {
                 options.ExcludeLaunchProfile = true;
             })
-            .WithHttpEndpoint(name: "http")
+            .WithHttpEndpoint(name: "http");
+
+        if (grpcOnlyAppChannel)
+        {
+            api = api.WithEnvironment("GRPC_ONLY_APP_CHANNEL", "true");
+        }
+
+        api = api
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", aspNetEnvironment)
             .WithEnvironment(HostingStartupAssembliesKey, string.Empty)
-            .WithHttpHealthCheck("/health")
             .WithExternalHttpEndpoints()
             .WithUrlForEndpoint("https", url => url.Url = "/scalar")
-            .WithUrlForEndpoint("http", url => url.Url = "/scalar");
+            .WithUrlForEndpoint("http", url => url.Url = "/scalar")
+            .WithDaprSidecar(sidecar => sidecar.WithOptions(daprSidecarOptions));
+
+        if (!grpcOnlyAppChannel)
+        {
+            api = api.WithHttpHealthCheck("/health");
+        }
+
+        return api;
     }
 
     /// <summary>

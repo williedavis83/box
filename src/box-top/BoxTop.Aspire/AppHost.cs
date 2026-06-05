@@ -8,7 +8,8 @@ var primaryApi = builder.AddApiProject(
 
 var secondaryApi = builder.AddApiProject(
     name: "secondary-api",
-    projectPath: @"..\..\box-content\Foo.Secondary.Api\Foo.Secondary.Api.csproj");
+    projectPath: @"..\..\box-content\Foo.Secondary.Api\Foo.Secondary.Api.csproj",
+    grpcOnlyAppChannel: true);
 
 var apis = new Dictionary<string, IResourceBuilder<ProjectResource>>
 {
