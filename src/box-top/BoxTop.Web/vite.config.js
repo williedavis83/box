@@ -7,5 +7,12 @@ export default defineConfig({
   server: {
     port: Number(process.env.PORT ?? 5173),
     strictPort: true,
+    proxy: {
+      '/api': {
+        target: process.env.PRIMARY_API_HTTPS ?? process.env.PRIMARY_API_HTTP,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 })

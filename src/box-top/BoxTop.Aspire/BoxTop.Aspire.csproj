@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\box-content\Foo.Primary.Api\Foo.Primary.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.4.2" />
   </ItemGroup>
 

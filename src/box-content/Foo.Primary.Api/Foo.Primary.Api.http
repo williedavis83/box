@@ -1,0 +1,5 @@
+@Foo.Primary.Api_HostAddress = http://localhost:5107
+
+GET {{Foo.Primary.Api_HostAddress}}/api/Hello
+
+###
