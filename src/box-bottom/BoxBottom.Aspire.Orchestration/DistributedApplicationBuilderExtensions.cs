@@ -76,10 +76,33 @@ public static class DistributedApplicationBuilderExtensions
             edge.WithEnvironment($"ReverseProxy__Routes__{routeKey}-route__Match__Path", routePath);
             edge.WithEnvironment(
                 $"ReverseProxy__Clusters__{clusterId}__Destinations__api__Address",
-                $"https://{apiResource.Resource.Name}");
+                $"http://{apiResource.Resource.Name}");
         }
 
         return edge.WithParentRelationship(web.Resource);
+    }
+
+    /// <summary>
+    /// Adds a category resource for dashboard grouping.
+    /// </summary>
+    public static IResourceBuilder<CategoryResource> AddCategory(
+        this IDistributedApplicationBuilder builder,
+        string name)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        var resource = new CategoryResource(name);
+
+        return builder.AddResource(resource)
+            .WithInitialState(new CustomResourceSnapshot
+            {
+                ResourceType = "Category",
+                Properties = [],
+                State = new ResourceStateSnapshot(KnownResourceStates.Running, KnownResourceStateStyles.Success),
+                CreationTimeStamp = DateTime.UtcNow,
+            })
+            .ExcludeFromManifest();
     }
 
     private static string BuildRoutePath(string logicalName, int apiCount)
