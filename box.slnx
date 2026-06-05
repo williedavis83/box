@@ -9,6 +9,7 @@
   </Folder>
   <Folder Name="/src/box-top/">
     <Project Path="src/box-top/BoxTop.Aspire/BoxTop.Aspire.csproj" />
+    <Project Path="src/box-top/BoxTop.Edge/BoxTop.Edge.csproj" />
     <Project Path="src/box-top/BoxTop.Web/BoxTop.Web.esproj">
       <Build />
       <Deploy />

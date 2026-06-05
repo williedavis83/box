@@ -9,7 +9,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: process.env.PRIMARY_API_HTTPS ?? process.env.PRIMARY_API_HTTP,
+        target: process.env.BOX_EDGE_HTTP,
         changeOrigin: true,
         secure: false,
       },
