@@ -5,19 +5,28 @@ namespace BoxBottom.Aspire.Orchestration;
 
 public static class DistributedApplicationBuilderExtensions
 {
+    private const string HostingStartupAssembliesKey = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
+
     /// <summary>
     /// Adds a .NET API project and applies standard Aspire configuration, including Scalar dashboard links.
     /// </summary>
     public static IResourceBuilder<ProjectResource> AddApiProject(
         this IDistributedApplicationBuilder builder,
         string name,
-        string projectPath)
+        string projectPath,
+        string aspNetEnvironment = "Development")
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(projectPath);
 
-        return builder.AddProject(name, projectPath)
+        return builder.AddProject(name, projectPath, options =>
+            {
+                options.ExcludeLaunchProfile = true;
+            })
+            .WithHttpEndpoint(name: "http")
+            .WithEnvironment("ASPNETCORE_ENVIRONMENT", aspNetEnvironment)
+            .WithEnvironment(HostingStartupAssembliesKey, string.Empty)
             .WithHttpHealthCheck("/health")
             .WithExternalHttpEndpoints()
             .WithUrlForEndpoint("https", url => url.Url = "/scalar")
