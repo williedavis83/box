@@ -1,0 +1,5 @@
+@Foo.Secondary.Api_HostAddress = http://localhost:5108
+
+GET {{Foo.Secondary.Api_HostAddress}}/api/World
+
+###

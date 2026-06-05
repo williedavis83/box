@@ -74,6 +74,18 @@ public static class DistributedApplicationBuilderExtensions
 
             edge.WithEnvironment($"ReverseProxy__Routes__{routeKey}-route__ClusterId", clusterId);
             edge.WithEnvironment($"ReverseProxy__Routes__{routeKey}-route__Match__Path", routePath);
+
+            if (apis.Count > 1 && !IsDefaultApiRoute(logicalName))
+            {
+                var routePathPrefix = BuildRoutePathPrefix(logicalName);
+                edge.WithEnvironment(
+                    $"ReverseProxy__Routes__{routeKey}-route__Transforms__0__PathRemovePrefix",
+                    routePathPrefix);
+                edge.WithEnvironment(
+                    $"ReverseProxy__Routes__{routeKey}-route__Transforms__1__PathPrefix",
+                    "/api");
+            }
+
             edge.WithEnvironment(
                 $"ReverseProxy__Clusters__{clusterId}__Destinations__api__Address",
                 $"http://{apiResource.Resource.Name}");
@@ -105,9 +117,23 @@ public static class DistributedApplicationBuilderExtensions
             .ExcludeFromManifest();
     }
 
+    private static string BuildRoutePathPrefix(string logicalName)
+    {
+        var normalized = BuildRouteKey(logicalName);
+        if (normalized.EndsWith("-api", StringComparison.Ordinal))
+        {
+            normalized = normalized[..^4];
+        }
+
+        return $"/api/{normalized}";
+    }
+
+    private static bool IsDefaultApiRoute(string logicalName) =>
+        string.Equals(logicalName, "primary-api", StringComparison.OrdinalIgnoreCase);
+
     private static string BuildRoutePath(string logicalName, int apiCount)
     {
-        if (apiCount == 1)
+        if (apiCount == 1 || IsDefaultApiRoute(logicalName))
         {
             return "/api/{**catch-all}";
         }

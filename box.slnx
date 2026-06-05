@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/src/box-content/">
     <Project Path="src/box-content/Foo.Primary.Api/Foo.Primary.Api.csproj" />
+    <Project Path="src/box-content/Foo.Secondary.Api/Foo.Secondary.Api.csproj" />
   </Folder>
   <Folder Name="/src/box-test/">
     <File Path="src/box-test/BoxTest.Playwright/package.json" />
