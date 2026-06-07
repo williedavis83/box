@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 
 const message = ref('')
 const error = ref('')
+const stackName = ref(__BOX_STACK_NAME__)
 
 onMounted(async () => {
   try {
@@ -21,6 +22,7 @@ onMounted(async () => {
 <template>
   <main class="page">
     <h1>BoxTop.Web</h1>
+    <p data-stack-name>{{ stackName }}</p>
     <p v-if="message" class="greeting">{{ message }}</p>
     <p v-else-if="error" class="error">{{ error }}</p>
     <p v-else>Loading...</p>

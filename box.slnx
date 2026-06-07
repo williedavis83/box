@@ -5,11 +5,15 @@
     <Project Path="src/box-bottom/BoxBottom.Aspire.ServiceDefaults/BoxBottom.Aspire.ServiceDefaults.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Dapr/BoxBottom.Dapr.csproj" />
   </Folder>
+  <Folder Name="/src/box-pack/">
+    <Project Path="src/box-pack/BoxPack.Aspire.Orchestration/BoxPack.Aspire.Orchestration.csproj" />
+  </Folder>
   <Folder Name="/src/box-content/">
     <Project Path="src/box-content/Foo.Primary.Api/Foo.Primary.Api.csproj" />
     <Project Path="src/box-content/Foo.Secondary.Api/Foo.Secondary.Api.csproj" />
   </Folder>
   <Folder Name="/src/box-test/">
+    <Project Path="src/box-test/BoxTest.Aspire.Orchestration.Test/BoxTest.Aspire.Orchestration.Test.csproj" />
     <File Path="src/box-test/BoxTest.Playwright/package.json" />
   </Folder>
   <Folder Name="/src/box-top/">

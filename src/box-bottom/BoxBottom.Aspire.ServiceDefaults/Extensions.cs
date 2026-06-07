@@ -1,7 +1,8 @@
+using BoxBottom.Aspire.ServiceDefaults;
+using BoxBottom.Aspire.ServiceDefaults.Controllers;
 using BoxBottom.Dapr;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ public static class Extensions
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
+    private const string StackNameEnvironmentVariable = "BOX_STACK_NAME";
 
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
@@ -28,11 +30,15 @@ public static class Extensions
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
-        builder.AddDaprGrpcAppChannel();
+
+        builder.Services.AddControllers()
+            .AddApplicationPart(typeof(StackController).Assembly);
 
         builder.Services.AddServiceDiscovery();
         builder.Services.AddDaprClient();
         builder.Services.AddSingleton<IDaprGrpcInvokerFactory, DaprGrpcInvokerFactory>();
+        builder.Services.AddSingleton(_ =>
+            new StackProperties(builder.Configuration[StackNameEnvironmentVariable] ?? string.Empty));
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
@@ -48,30 +54,6 @@ public static class Extensions
         // {
         //     options.AllowedSchemes = ["https"];
         // });
-
-        return builder;
-    }
-
-    /// <summary>
-    /// Configures Kestrel for Dapr h2c gRPC app channels when <c>GRPC_ONLY_APP_CHANNEL</c> is enabled.
-    /// </summary>
-    public static TBuilder AddDaprGrpcAppChannel<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    {
-        if (!string.Equals(
-                builder.Configuration["GRPC_ONLY_APP_CHANNEL"],
-                "true",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return builder;
-        }
-
-        builder.Services.Configure<KestrelServerOptions>(options =>
-        {
-            options.ConfigureEndpointDefaults(listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http2;
-            });
-        });
 
         return builder;
     }

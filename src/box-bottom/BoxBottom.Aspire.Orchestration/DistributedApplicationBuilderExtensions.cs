@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.JavaScript;
 using CommunityToolkit.Aspire.Hosting.Dapr;
 
 namespace BoxBottom.Aspire.Orchestration;
@@ -7,6 +8,7 @@ namespace BoxBottom.Aspire.Orchestration;
 public static class DistributedApplicationBuilderExtensions
 {
     private const string HostingStartupAssembliesKey = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
+    private const string StackNameEnvironmentVariable = "BOX_STACK_NAME";
     private const string DaprComponentsPath = "../../dapr/components";
     private const string DaprConfigPath = "../../dapr/config.yaml";
 
@@ -15,50 +17,75 @@ public static class DistributedApplicationBuilderExtensions
     /// </summary>
     public static IResourceBuilder<ProjectResource> AddApiProject(
         this IDistributedApplicationBuilder builder,
-        string name,
-        string projectPath,
-        string aspNetEnvironment = "Development",
-        bool grpcOnlyAppChannel = false)
+        ApiProjectOptions options)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        ArgumentException.ThrowIfNullOrWhiteSpace(projectPath);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.LogicalName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.ProjectPath);
 
         var daprSidecarOptions = new DaprSidecarOptions
         {
-            AppId = name,
+            AppId = options.StackName,
             Config = DaprConfigPath,
             ResourcesPaths = [DaprComponentsPath],
-            AppChannelAddress = grpcOnlyAppChannel ? "127.0.0.1" : null,
-            AppEndpoint = grpcOnlyAppChannel ? "http" : null,
-            AppProtocol = grpcOnlyAppChannel ? "h2c" : null,
+            AppChannelAddress = options.GrpcOnlyAppChannel ? "127.0.0.1" : null,
+            AppEndpoint = options.GrpcOnlyAppChannel ? "grpc" : null,
+            AppProtocol = options.GrpcOnlyAppChannel ? "h2c" : null,
         };
 
-        var api = builder.AddProject(name, projectPath, options =>
+        var api = builder.AddProject(options.StackName, options.ProjectPath, projectOptions =>
             {
-                options.ExcludeLaunchProfile = true;
-            })
-            .WithHttpEndpoint(name: "http");
+                projectOptions.ExcludeLaunchProfile = true;
+            });
 
-        if (grpcOnlyAppChannel)
+        if (!options.GrpcOnlyAppChannel)
         {
-            api = api.WithEnvironment("GRPC_ONLY_APP_CHANNEL", "true");
+            api = api.WithHttpEndpoint(name: "http");
         }
 
         api = api
-            .WithEnvironment("ASPNETCORE_ENVIRONMENT", aspNetEnvironment)
-            .WithEnvironment(HostingStartupAssembliesKey, string.Empty)
-            .WithExternalHttpEndpoints()
-            .WithUrlForEndpoint("https", url => url.Url = "/scalar")
-            .WithUrlForEndpoint("http", url => url.Url = "/scalar")
-            .WithDaprSidecar(sidecar => sidecar.WithOptions(daprSidecarOptions));
+            .WithEnvironment("ASPNETCORE_ENVIRONMENT", options.AspNetEnvironment)
+            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix)
+            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
 
-        if (!grpcOnlyAppChannel)
+        foreach (var (key, value) in options.EnvironmentVariables)
         {
-            api = api.WithHttpHealthCheck("/health");
+            api = api.WithEnvironment(key, value);
         }
 
+        api = api
+            .WithExternalHttpEndpoints()
+            .WithUrlForEndpoint("http", url => url.Url = "/scalar")
+            .WithDaprSidecar(sidecar => sidecar.WithOptions(daprSidecarOptions))
+            .WithHttpHealthCheck("/health");
+
         return api;
+    }
+
+    /// <summary>
+    /// Adds a Vite web app and applies standard Aspire configuration.
+    /// </summary>
+    public static IResourceBuilder<ViteAppResource> AddWebProject(
+        this IDistributedApplicationBuilder builder,
+        WebProjectOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.LogicalName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.ProjectPath);
+
+        var web = builder.AddViteApp(options.StackName, options.ProjectPath)
+            .WithPnpm()
+            .WithExternalHttpEndpoints()
+            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix);
+
+        foreach (var (key, value) in options.EnvironmentVariables)
+        {
+            web = web.WithEnvironment(key, value);
+        }
+
+        return web;
     }
 
     /// <summary>
@@ -67,15 +94,15 @@ public static class DistributedApplicationBuilderExtensions
     /// </summary>
     public static IResourceBuilder<ProjectResource> AddEdgeProject<TWeb>(
         this IDistributedApplicationBuilder builder,
-        string name,
-        string projectPath,
+        EdgeProjectOptions options,
         IReadOnlyDictionary<string, IResourceBuilder<ProjectResource>> apis,
         IResourceBuilder<TWeb> web)
         where TWeb : IResource
     {
         ArgumentNullException.ThrowIfNull(builder);
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        ArgumentException.ThrowIfNullOrWhiteSpace(projectPath);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.LogicalName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.ProjectPath);
         ArgumentNullException.ThrowIfNull(apis);
         ArgumentNullException.ThrowIfNull(web);
 
@@ -84,9 +111,21 @@ public static class DistributedApplicationBuilderExtensions
             throw new ArgumentException("At least one API resource is required.", nameof(apis));
         }
 
-        var edge = builder.AddProject(name, projectPath)
+        var edge = builder.AddProject(options.StackName, options.ProjectPath, projectOptions =>
+            {
+                projectOptions.ExcludeLaunchProfile = true;
+            })
+            .WithHttpEndpoint(name: "http")
             .WithHttpHealthCheck("/health")
-            .WithExternalHttpEndpoints();
+            .WithExternalHttpEndpoints()
+            .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
+            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix)
+            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
+
+        foreach (var (key, value) in options.EnvironmentVariables)
+        {
+            edge = edge.WithEnvironment(key, value);
+        }
 
         foreach (var (logicalName, apiResource) in apis.OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase))
         {
@@ -96,16 +135,16 @@ public static class DistributedApplicationBuilderExtensions
             apiResource.WithParentRelationship(edge);
             edge.WithReference(apiResource).WaitFor(apiResource);
 
-            var routeKey = BuildRouteKey(logicalName);
+            var routeKey = EdgeRoutingConfiguration.BuildRouteKey(logicalName);
             var clusterId = $"{routeKey}-cluster";
-            var routePath = BuildRoutePath(logicalName, apis.Count);
+            var routePath = EdgeRoutingConfiguration.BuildRoutePath(logicalName, apis.Count);
 
             edge.WithEnvironment($"ReverseProxy__Routes__{routeKey}-route__ClusterId", clusterId);
             edge.WithEnvironment($"ReverseProxy__Routes__{routeKey}-route__Match__Path", routePath);
 
-            if (apis.Count > 1 && !IsDefaultApiRoute(logicalName))
+            if (apis.Count > 1 && !EdgeRoutingConfiguration.IsDefaultApiRoute(logicalName))
             {
-                var routePathPrefix = BuildRoutePathPrefix(logicalName);
+                var routePathPrefix = EdgeRoutingConfiguration.BuildRoutePathPrefix(logicalName);
                 edge.WithEnvironment(
                     $"ReverseProxy__Routes__{routeKey}-route__Transforms__0__PathRemovePrefix",
                     routePathPrefix);
@@ -116,7 +155,7 @@ public static class DistributedApplicationBuilderExtensions
 
             edge.WithEnvironment(
                 $"ReverseProxy__Clusters__{clusterId}__Destinations__api__Address",
-                $"http://{apiResource.Resource.Name}");
+                EdgeRoutingConfiguration.BuildApiClusterAddress(apiResource.Resource.Name));
         }
 
         return edge.WithParentRelationship(web.Resource);
@@ -145,39 +184,4 @@ public static class DistributedApplicationBuilderExtensions
             .ExcludeFromManifest();
     }
 
-    private static string BuildRoutePathPrefix(string logicalName)
-    {
-        var normalized = BuildRouteKey(logicalName);
-        if (normalized.EndsWith("-api", StringComparison.Ordinal))
-        {
-            normalized = normalized[..^4];
-        }
-
-        return $"/api/{normalized}";
-    }
-
-    private static bool IsDefaultApiRoute(string logicalName) =>
-        string.Equals(logicalName, "primary-api", StringComparison.OrdinalIgnoreCase);
-
-    private static string BuildRoutePath(string logicalName, int apiCount)
-    {
-        if (apiCount == 1 || IsDefaultApiRoute(logicalName))
-        {
-            return "/api/{**catch-all}";
-        }
-
-        var normalized = BuildRouteKey(logicalName);
-        if (normalized.EndsWith("-api", StringComparison.Ordinal))
-        {
-            normalized = normalized[..^4];
-        }
-
-        return $"/api/{normalized}/{{**catch-all}}";
-    }
-
-    private static string BuildRouteKey(string logicalName)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(logicalName);
-        return logicalName.Trim().ToLowerInvariant().Replace('_', '-');
-    }
 }

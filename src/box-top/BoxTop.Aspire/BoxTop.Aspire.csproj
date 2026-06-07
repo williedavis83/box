@@ -12,6 +12,9 @@
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Aspire.Orchestration\BoxBottom.Aspire.Orchestration.csproj">
       <IsAspireProjectResource>false</IsAspireProjectResource>
     </ProjectReference>
+    <ProjectReference Include="..\..\box-pack\BoxPack.Aspire.Orchestration\BoxPack.Aspire.Orchestration.csproj">
+      <IsAspireProjectResource>false</IsAspireProjectResource>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

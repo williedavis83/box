@@ -1,25 +1,41 @@
+using BoxBottom.Aspire.ServiceDefaults;
 using BoxBottom.Dapr;
 using Foo.Secondary.Api.Grpc;
+using Grpc.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Foo.Primary.Api.Controllers;
 
 [ApiController]
 [Route("api")]
-public class HelloController(IDaprGrpcInvokerFactory daprGrpcInvokerFactory) : ControllerBase
+public class HelloController(
+    IDaprGrpcInvokerFactory daprGrpcInvokerFactory,
+    StackProperties stackProperties) : ControllerBase
 {
-    private const string SecondaryApiAppId = "secondary-api";
+    private const string _secondaryApiLogicalName = "secondary-api";
 
     [HttpGet("Hello")]
     public async Task<IActionResult> Hello(CancellationToken cancellationToken)
     {
-        var invoker = daprGrpcInvokerFactory.CreateInvoker(SecondaryApiAppId);
-        var client = new World.WorldClient(invoker);
+        try
+        {
+            var secondaryApiAppId = stackProperties.ResolveDaprAppId(_secondaryApiLogicalName);
+            var invoker = daprGrpcInvokerFactory.CreateInvoker(secondaryApiAppId);
+            var client = new World.WorldClient(invoker);
 
-        var reply = await client.GetWorldAsync(
-            new GetWorldRequest(),
-            cancellationToken: cancellationToken);
+            var reply = await client.GetWorldAsync(
+                new GetWorldRequest(),
+                cancellationToken: cancellationToken);
 
-        return Ok($"Hello, {reply.Message}!");
+            return Ok($"Hello, {reply.Message}!");
+        }
+        catch (RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.Cancelled)
+        {
+            return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
     }
 }
