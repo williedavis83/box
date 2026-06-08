@@ -1,0 +1,13 @@
+{
+  "name": "@box-pack/web-navigation",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@foo/web-hello": "file:../../box-content/Foo.Web.Hello",
+    "@foo/web-test": "file:../../box-content/Foo.Web.Test"
+  }
+}

@@ -13,21 +13,3 @@ body {
 #app {
   min-height: 100vh;
 }
-
-.page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  gap: 1rem;
-}
-
-.greeting {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.error {
-  color: #b42318;
-}

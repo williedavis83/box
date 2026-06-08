@@ -1,30 +1,38 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { provide } from 'vue'
+import {
+  createTabRegistry,
+  Footer,
+  Header,
+  Main,
+  REGISTER_DYNAMIC_TAB_KEY,
+  TAB_REGISTRY_KEY,
+} from '@box-bottom/web-components'
+import { brandingConfig } from '@box-pack/web-basics'
+import { initialTabs } from '@box-pack/web-navigation'
+import { addRouteForTab } from './router.js'
 
-const message = ref('')
-const error = ref('')
-const stackName = ref(__BOX_STACK_NAME__)
+const registry = createTabRegistry(initialTabs, { env: import.meta.env })
 
-onMounted(async () => {
-  try {
-    const response = await fetch('/api/Hello')
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`)
-    }
-
-    message.value = await response.text()
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load greeting'
-  }
+provide(TAB_REGISTRY_KEY, registry)
+provide(REGISTER_DYNAMIC_TAB_KEY, (tab) => {
+  registry.addTab(tab)
+  addRouteForTab(tab)
 })
 </script>
 
 <template>
-  <main class="page">
-    <h1>BoxTop.Web</h1>
-    <p data-stack-name>{{ stackName }}</p>
-    <p v-if="message" class="greeting">{{ message }}</p>
-    <p v-else-if="error" class="error">{{ error }}</p>
-    <p v-else>Loading...</p>
-  </main>
+  <div class="layout">
+    <Header :branding="brandingConfig" />
+    <Main use-router-view />
+    <Footer />
+  </div>
 </template>
+
+<style scoped>
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+</style>

@@ -4,13 +4,33 @@
     <Project Path="src/box-bottom/BoxBottom.Aspire.Orchestration/BoxBottom.Aspire.Orchestration.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Aspire.ServiceDefaults/BoxBottom.Aspire.ServiceDefaults.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Dapr/BoxBottom.Dapr.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Web.Components/BoxBottom.Web.Components.esproj">
+      <Build />
+      <Deploy />
+    </Project>
   </Folder>
   <Folder Name="/src/box-pack/">
     <Project Path="src/box-pack/BoxPack.Aspire.Orchestration/BoxPack.Aspire.Orchestration.csproj" />
+    <Project Path="src/box-pack/BoxPack.Web.Basics/BoxPack.Web.Basics.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="src/box-pack/BoxPack.Web.Navigation/BoxPack.Web.Navigation.esproj">
+      <Build />
+      <Deploy />
+    </Project>
   </Folder>
   <Folder Name="/src/box-content/">
     <Project Path="src/box-content/Foo.Primary.Api/Foo.Primary.Api.csproj" />
     <Project Path="src/box-content/Foo.Secondary.Api/Foo.Secondary.Api.csproj" />
+    <Project Path="src/box-content/Foo.Web.Hello/Foo.Web.Hello.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="src/box-content/Foo.Web.Test/Foo.Web.Test.esproj">
+      <Build />
+      <Deploy />
+    </Project>
   </Folder>
   <Folder Name="/src/box-test/">
     <Project Path="src/box-test/BoxTest.Aspire.Orchestration.Test/BoxTest.Aspire.Orchestration.Test.csproj" />

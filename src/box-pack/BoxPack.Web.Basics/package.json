@@ -1,0 +1,11 @@
+{
+  "name": "@box-pack/web-basics",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./BrandingConfig.js": "./src/BrandingConfig.js",
+    "./WebTitle.js": "./src/WebTitle.js"
+  }
+}

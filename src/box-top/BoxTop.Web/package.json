@@ -10,7 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.35"
+    "@box-bottom/web-components": "file:../../box-bottom/BoxBottom.Web.Components",
+    "@box-pack/web-basics": "file:../../box-pack/BoxPack.Web.Basics",
+    "@box-pack/web-navigation": "file:../../box-pack/BoxPack.Web.Navigation",
+    "@foo/web-hello": "file:../../box-content/Foo.Web.Hello",
+    "@foo/web-test": "file:../../box-content/Foo.Web.Test",
+    "vue": "^3.5.35",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",
