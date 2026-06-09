@@ -6,7 +6,8 @@ namespace BoxBottom.Aspire.Orchestration;
 
 public sealed class StackOperations(IDistributedApplicationBuilder builder,
     string webProjectPath, 
-    string edgeProjectPath)
+    string edgeProjectPath,
+    string metaProjectPath)
 {
     public const string ToolsCategoryName = "tools";
     private const string WebLogicalName = "web";
@@ -25,7 +26,10 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
                 projectPath: webProjectPath),
             edge: new EdgeProjectOptions(
                 logicalName: "edge",
-                projectPath: edgeProjectPath)
+                projectPath: edgeProjectPath),
+            meta: new MetaProjectOptions(
+                logicalName: MetaCatalogConfiguration.MetaLogicalName,
+                projectPath: metaProjectPath)
         );
 
         return stack;
@@ -62,7 +66,8 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
             {
                 playwright = playwright
                     .WaitFor(stack.Web)
-                    .WaitFor(stack.Edge);
+                    .WaitFor(stack.Edge)
+                    .WaitFor(stack.Meta);
 
                 playwright = AddPlaywrightHttpEndpoint(
                     playwright,
@@ -74,6 +79,11 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
                     stackName,
                     EdgeLogicalName,
                     stack.Edge.GetEndpoint("http"));
+                playwright = AddPlaywrightHttpEndpoint(
+                    playwright,
+                    stackName,
+                    MetaCatalogConfiguration.MetaLogicalName,
+                    stack.Meta.GetEndpoint("http"));
 
                 foreach (var (apiLogicalName, api) in stack.Apis)
                 {
@@ -133,8 +143,16 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
             apis,
             web);
 
+        var meta = _builder.AddMetaProject(
+            stack.Meta,
+            apis,
+            web);
+
+        edge.ConfigureMetaRoute(meta);
+
         var webHttpEndpoint = web.GetEndpoint("http");
         var edgeHttpEndpoint = edge.GetEndpoint("http");
+        var metaHttpEndpoint = meta.GetEndpoint("http");
 
         web.WithReference(edge)
             .WaitFor(edge)
@@ -146,10 +164,15 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
                 BuildHttpEnvironmentVariable(stack.Name, stack.Edge.LogicalName),
                 edgeHttpEndpoint.Property(EndpointProperty.Url));
 
+        meta.WithEnvironment(
+            BuildHttpEnvironmentVariable(stack.Name, MetaCatalogConfiguration.MetaLogicalName),
+            metaHttpEndpoint.Property(EndpointProperty.Url));
+
         return new StackResources
         {
             Web = web,
             Edge = edge,
+            Meta = meta,
             Apis = apis,
         };
     }

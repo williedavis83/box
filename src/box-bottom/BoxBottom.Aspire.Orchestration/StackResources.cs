@@ -10,5 +10,7 @@ public sealed class StackResources
 
     public required IResourceBuilder<ProjectResource> Edge { get; init; }
 
+    public required IResourceBuilder<ProjectResource> Meta { get; init; }
+
     public required IReadOnlyDictionary<string, IResourceBuilder<ProjectResource>> Apis { get; init; }
 }

@@ -27,6 +27,13 @@ public class EdgeRoutingConfigurationTests
         Assert.Equal("/api/secondary", EdgeRoutingConfiguration.BuildRoutePathPrefix("secondary-api"));
     }
 
+    [Fact]
+    public void BuildMetaRoutePath_UsesMetaPrefix()
+    {
+        Assert.Equal("/api/meta/{**catch-all}", EdgeRoutingConfiguration.BuildMetaRoutePath());
+        Assert.Equal("/api/meta", EdgeRoutingConfiguration.BuildMetaRoutePathPrefix());
+    }
+
     [Theory]
     [InlineData("primary_api", "primary-api")]
     [InlineData("Secondary-API", "secondary-api")]

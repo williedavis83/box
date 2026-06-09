@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useComponentHost } from '@box-bottom/web-components'
 
 const props = defineProps({
   stackName: {
@@ -8,11 +9,17 @@ const props = defineProps({
   },
 })
 
+const componentHost = useComponentHost()
+const canRender = computed(() => componentHost.value.requiresApi('primary-api'))
+
 const message = ref('')
 const error = ref('')
 const resolvedStackName = ref(props.stackName || globalThis.__BOX_STACK_NAME__ || '')
 
-onMounted(async () => {
+async function loadGreeting() {
+  message.value = ''
+  error.value = ''
+
   try {
     const response = await fetch('/api/Hello')
     if (!response.ok) {
@@ -23,11 +30,23 @@ onMounted(async () => {
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load greeting'
   }
+}
+
+onMounted(() => {
+  if (canRender.value) {
+    loadGreeting()
+  }
+})
+
+watch(canRender, (isAllowed) => {
+  if (isAllowed) {
+    loadGreeting()
+  }
 })
 </script>
 
 <template>
-  <section class="hello-view">
+  <section v-if="canRender" class="hello-view">
     <p data-stack-name>{{ resolvedStackName }}</p>
     <p v-if="message" class="greeting">{{ message }}</p>
     <p v-else-if="error" class="error">{{ error }}</p>

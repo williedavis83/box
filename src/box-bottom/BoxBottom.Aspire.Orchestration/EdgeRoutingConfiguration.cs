@@ -54,4 +54,8 @@ public static class EdgeRoutingConfiguration
 
         return $"/api/{normalized}";
     }
+
+    public static string BuildMetaRoutePath() => "/api/meta/{**catch-all}";
+
+    public static string BuildMetaRoutePathPrefix() => "/api/meta";
 }

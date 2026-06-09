@@ -162,6 +162,91 @@ public static class DistributedApplicationBuilderExtensions
     }
 
     /// <summary>
+    /// Adds the meta API project and wires catalog environment variables from <paramref name="apis"/>.
+    /// </summary>
+    public static IResourceBuilder<ProjectResource> AddMetaProject(
+        this IDistributedApplicationBuilder builder,
+        MetaProjectOptions options,
+        IReadOnlyDictionary<string, IResourceBuilder<ProjectResource>> apis,
+        IResourceBuilder<IResource> web)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.LogicalName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.ProjectPath);
+        ArgumentNullException.ThrowIfNull(apis);
+        ArgumentNullException.ThrowIfNull(web);
+
+        if (apis.Count == 0)
+        {
+            throw new ArgumentException("At least one API resource is required.", nameof(apis));
+        }
+
+        var meta = builder.AddProject(options.StackName, options.ProjectPath, projectOptions =>
+            {
+                projectOptions.ExcludeLaunchProfile = true;
+            })
+            .WithHttpEndpoint(name: "http")
+            .WithHttpHealthCheck("/health")
+            .WithExternalHttpEndpoints()
+            .WithUrlForEndpoint("http", url => url.Url = "/scalar")
+            .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
+            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix)
+            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
+
+        foreach (var (key, value) in options.EnvironmentVariables)
+        {
+            meta = meta.WithEnvironment(key, value);
+        }
+
+        foreach (var (logicalName, apiResource) in apis)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(logicalName);
+            ArgumentNullException.ThrowIfNull(apiResource);
+
+            meta = meta.WithReference(apiResource).WaitFor(apiResource);
+        }
+
+        foreach (var (key, value) in MetaCatalogConfiguration.BuildApiCatalogEnvironmentVariables(apis, meta))
+        {
+            meta = meta.WithEnvironment(key, value);
+        }
+
+        return meta.WithParentRelationship(web.Resource);
+    }
+
+    /// <summary>
+    /// Adds a YARP route on the edge proxy for the meta API at <c>/api/meta/{**catch-all}</c>.
+    /// </summary>
+    public static IResourceBuilder<ProjectResource> ConfigureMetaRoute(
+        this IResourceBuilder<ProjectResource> edge,
+        IResourceBuilder<ProjectResource> meta)
+    {
+        ArgumentNullException.ThrowIfNull(edge);
+        ArgumentNullException.ThrowIfNull(meta);
+
+        var routeKey = MetaCatalogConfiguration.MetaLogicalName;
+        var clusterId = $"{routeKey}-cluster";
+
+        edge.WithReference(meta)
+            .WaitFor(meta)
+            .WithEnvironment($"ReverseProxy__Routes__{routeKey}-route__ClusterId", clusterId)
+            .WithEnvironment($"ReverseProxy__Routes__{routeKey}-route__Match__Path", EdgeRoutingConfiguration.BuildMetaRoutePath())
+            .WithEnvironment(
+                $"ReverseProxy__Routes__{routeKey}-route__Transforms__0__PathRemovePrefix",
+                EdgeRoutingConfiguration.BuildMetaRoutePathPrefix())
+            .WithEnvironment(
+                $"ReverseProxy__Routes__{routeKey}-route__Transforms__1__PathPrefix",
+                "/api");
+
+        edge.WithEnvironment(
+            $"ReverseProxy__Clusters__{clusterId}__Destinations__api__Address",
+            EdgeRoutingConfiguration.BuildApiClusterAddress(meta.Resource.Name));
+
+        return edge;
+    }
+
+    /// <summary>
     /// Adds a category resource for dashboard grouping.
     /// </summary>
     public static IResourceBuilder<CategoryResource> AddCategory(

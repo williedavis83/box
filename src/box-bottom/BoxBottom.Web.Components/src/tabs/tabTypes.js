@@ -3,6 +3,7 @@
  *
  * @typedef {Object} TabContext
  * @property {ImportMetaEnv} [env]
+ * @property {import('../host/componentHost.js').ComponentHost} [componentHost]
  *
  * @typedef {(ctx: TabContext) => boolean} TabPredicate
  *

@@ -38,6 +38,13 @@ public record StackDefinition
         set => _edge = value with { StackPrefix = Name, EnvironmentVariables = value.EnvironmentVariables };
     }
 
+    private MetaProjectOptions? _meta;
+    public required MetaProjectOptions Meta
+    {
+        get => _meta!;
+        set => _meta = value with { StackPrefix = Name, EnvironmentVariables = value.EnvironmentVariables };
+    }
+
     public ApiProjectOptions this[string logicalName] => _apis[logicalName];
 
     public void AddApi(ApiProjectOptions api)
@@ -50,11 +57,12 @@ public record StackDefinition
     public IEnumerable<ApiProjectOptions> GetApis() => _apis.Values;
 
     [SetsRequiredMembers]
-    public StackDefinition(string name, WebProjectOptions web, EdgeProjectOptions edge)
+    public StackDefinition(string name, WebProjectOptions web, EdgeProjectOptions edge, MetaProjectOptions meta)
     {
         _name = name;
         Web = web;
         Edge = edge;
+        Meta = meta;
         _apis = new Dictionary<string, ApiProjectOptions>(StringComparer.OrdinalIgnoreCase);
 
     }
@@ -73,6 +81,7 @@ public record StackDefinition
         _name = original._name;
         Web = new WebProjectOptions(original.Web);
         Edge = new EdgeProjectOptions(original.Edge);
+        Meta = new MetaProjectOptions(original.Meta);
 
         foreach (var (logicalName, api) in original._apis)
         {
@@ -84,6 +93,7 @@ public record StackDefinition
     {
         Web = Web with { StackPrefix = stackPrefix };
         Edge = Edge with { StackPrefix = stackPrefix };
+        Meta = Meta with { StackPrefix = stackPrefix };
 
         foreach (var logicalName in _apis.Keys.ToList())
         {

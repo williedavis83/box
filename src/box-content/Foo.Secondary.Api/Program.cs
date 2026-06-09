@@ -12,10 +12,7 @@ builder.Services.Configure<WorldOptions>(builder.Configuration.GetSection(WorldO
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.MapOpenApi();
 
 app.MapGrpcService<WorldGrpcService>();
 app.MapControllers();

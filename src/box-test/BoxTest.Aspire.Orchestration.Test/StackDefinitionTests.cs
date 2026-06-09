@@ -16,7 +16,7 @@ public class StackDefinitionTests
     }
 
     [Fact]
-    public void WithExpression_RenamesWebEdgeAndApis()
+    public void WithExpression_RenamesWebEdgeMetaAndApis()
     {
         var stack = CreateStack("box");
 
@@ -27,6 +27,8 @@ public class StackDefinitionTests
         Assert.Equal("name2-web", renamed.Web.StackName);
         Assert.Equal("name2", renamed.Edge.StackPrefix);
         Assert.Equal("name2-edge", renamed.Edge.StackName);
+        Assert.Equal("name2", renamed.Meta.StackPrefix);
+        Assert.Equal("name2-meta", renamed.Meta.StackName);
         Assert.Equal("name2-primary-api", renamed["primary-api"].StackName);
         Assert.Equal("name2-secondary-api", renamed["secondary-api"].StackName);
     }
@@ -42,6 +44,7 @@ public class StackDefinitionTests
         Assert.Equal("box", stack.Web.StackPrefix);
         Assert.Equal("box-web", stack.Web.StackName);
         Assert.Equal("box-edge", stack.Edge.StackName);
+        Assert.Equal("box-meta", stack.Meta.StackName);
         Assert.Equal("box-primary-api", stack["primary-api"].StackName);
         Assert.Equal("box-secondary-api", stack["secondary-api"].StackName);
     }
@@ -106,6 +109,21 @@ public class StackDefinitionTests
     }
 
     [Fact]
+    public void WithExpression_ClearsMetaEnvironmentVariables()
+    {
+        var stack = CreateStackWithEnvironmentVariables("box");
+        var renamed = stack with { Name = "name2" };
+
+        Assert.NotSame(stack.Meta.EnvironmentVariables, renamed.Meta.EnvironmentVariables);
+        Assert.Empty(renamed.Meta.EnvironmentVariables);
+
+        renamed.Meta.EnvironmentVariables["BOX_META_HTTP"] = "name2-value";
+
+        Assert.Equal("box-value", stack.Meta.EnvironmentVariables["BOX_META_HTTP"]);
+        Assert.Equal("name2-value", renamed.Meta.EnvironmentVariables["BOX_META_HTTP"]);
+    }
+
+    [Fact]
     public void WithExpression_ClearsApiEnvironmentVariables()
     {
         var stack = CreateStackWithEnvironmentVariables("box");
@@ -144,7 +162,10 @@ public class StackDefinitionTests
                 projectPath: "../BoxTop.Web"),
             edge: new EdgeProjectOptions(
                 logicalName: "edge",
-                projectPath: @"..\BoxTop.Edge\BoxTop.Edge.csproj")
+                projectPath: @"..\BoxTop.Edge\BoxTop.Edge.csproj"),
+            meta: new MetaProjectOptions(
+                logicalName: "meta",
+                projectPath: @"..\BoxTop.Meta.Api\BoxTop.Meta.Api.csproj")
         );
 
         stack.AddApi(new ApiProjectOptions(
@@ -176,6 +197,13 @@ public class StackDefinitionTests
                 environmentVariables: new Dictionary<string, string>
                 {
                     ["BOX_EDGE_HTTP"] = "box-value",
+                }),
+            meta: new MetaProjectOptions(
+                logicalName: "meta",
+                projectPath: @"..\BoxTop.Meta.Api\BoxTop.Meta.Api.csproj",
+                environmentVariables: new Dictionary<string, string>
+                {
+                    ["BOX_META_HTTP"] = "box-value",
                 }));
 
         stack.AddApi(new ApiProjectOptions(

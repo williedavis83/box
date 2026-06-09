@@ -75,7 +75,10 @@ public class OrchestratorShapeTests
                 projectPath: "../BoxTop.Web"),
             edge: new EdgeProjectOptions(
                 logicalName: "edge",
-                projectPath: @"..\BoxTop.Edge\BoxTop.Edge.csproj"));
+                projectPath: @"..\BoxTop.Edge\BoxTop.Edge.csproj"),
+            meta: new MetaProjectOptions(
+                logicalName: "meta",
+                projectPath: @"..\BoxTop.Meta.Api\BoxTop.Meta.Api.csproj"));
 
         stack.AddApi(new ApiProjectOptions(
             logicalName: "primary-api",
