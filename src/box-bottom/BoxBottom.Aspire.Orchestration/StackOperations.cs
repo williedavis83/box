@@ -10,11 +10,13 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
     string metaProjectPath)
 {
     public const string ToolsCategoryName = "tools";
+    public const string SupportCategoryName = "support";
     private const string WebLogicalName = "web";
     private const string EdgeLogicalName = "edge";
 
     private readonly IDistributedApplicationBuilder _builder = builder;
     private IResourceBuilder<CategoryResource>? _toolsCategory;
+    private IResourceBuilder<CategoryResource>? _supportCategory;
 
     public StackDefinition CreateStackDefinition(string name)
     {
@@ -43,6 +45,16 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
 
         var tools = _toolsCategory ??= _builder.AddCategory(ToolsCategoryName);
         return configureTool(_builder).WithParentRelationship(tools.Resource);
+    }
+
+    public IResourceBuilder<TResource> OrchestrateSupport<TResource>(
+        Func<IDistributedApplicationBuilder, IResourceBuilder<TResource>> configureSupport)
+        where TResource : IResource
+    {
+        ArgumentNullException.ThrowIfNull(configureSupport);
+
+        var support = _supportCategory ??= _builder.AddCategory(SupportCategoryName);
+        return configureSupport(_builder).WithParentRelationship(support.Resource);
     }
 
     public IResourceBuilder<JavaScriptAppResource> OrchestratePlaywrightTool(

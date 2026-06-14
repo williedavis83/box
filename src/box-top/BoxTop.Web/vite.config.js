@@ -24,18 +24,6 @@ export default defineConfig({
         repoSrc,
         'box-pack/BoxPack.Web.Basics/src/index.js',
       ),
-      '@box-pack/web-navigation': path.resolve(
-        repoSrc,
-        'box-pack/BoxPack.Web.Navigation/src/index.js',
-      ),
-      '@foo/web-hello': path.resolve(
-        repoSrc,
-        'box-content/Foo.Web.Hello/src/index.js',
-      ),
-      '@foo/web-test': path.resolve(
-        repoSrc,
-        'box-content/Foo.Web.Test/src/index.js',
-      ),
     },
   },
   server: {

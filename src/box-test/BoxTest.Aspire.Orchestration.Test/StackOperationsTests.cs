@@ -5,6 +5,12 @@ namespace BoxTest.Aspire.Orchestration.Test;
 
 public class StackOperationsTests
 {
+    [Fact]
+    public void SupportCategoryName_IsSupport()
+    {
+        Assert.Equal("support", StackOperations.SupportCategoryName);
+    }
+
     [Theory]
     [InlineData("box", "web", "BOX_WEB_HTTP")]
     [InlineData("box", "edge", "BOX_EDGE_HTTP")]

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@11.5.2",
+  "packageManager": "pnpm@11.5.3",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,10 +13,8 @@
     "@box-bottom/web-components": "file:../../box-bottom/BoxBottom.Web.Components",
     "@box-pack/web-basics": "file:../../box-pack/BoxPack.Web.Basics",
     "@box-pack/web-navigation": "file:../../box-pack/BoxPack.Web.Navigation",
-    "@foo/web-hello": "file:../../box-content/Foo.Web.Hello",
-    "@foo/web-test": "file:../../box-content/Foo.Web.Test",
     "vue": "^3.5.35",
-    "vue-router": "^4.6.4"
+    "vue-router": "^5.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",

@@ -247,6 +247,29 @@ public static class DistributedApplicationBuilderExtensions
     }
 
     /// <summary>
+    /// Adds a support-category project with standard HTTP and health-check configuration.
+    /// </summary>
+    public static IResourceBuilder<ProjectResource> AddSupportProject(
+        this IDistributedApplicationBuilder builder,
+        string resourceName,
+        string projectPath)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectPath);
+
+        return builder.AddProject(resourceName, projectPath, projectOptions =>
+            {
+                projectOptions.ExcludeLaunchProfile = true;
+            })
+            .WithHttpEndpoint(name: "http")
+            .WithHttpHealthCheck("/health")
+            .WithExternalHttpEndpoints()
+            .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
+            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
+    }
+
+    /// <summary>
     /// Adds a category resource for dashboard grouping.
     /// </summary>
     public static IResourceBuilder<CategoryResource> AddCategory(

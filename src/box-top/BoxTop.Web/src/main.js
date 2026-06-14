@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { applyFavicon, applyWebTitle } from '@box-pack/web-basics'
 import './style.css'
 import App from './App.vue'
-import { router } from './router.js'
+import { router } from '@box-pack/web-navigation'
 
 applyWebTitle()
 applyFavicon()

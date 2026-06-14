@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,15 +8,19 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Aspire.ServiceDefaults\BoxBottom.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Emulation\BoxBottom.Emulation.csproj" />
+    <ProjectReference Include="..\Foo.Primary.Shared\Foo.Primary.Shared.csproj" />
+    <ProjectReference Include="..\Blabber.Emulator\Blabber.Emulator.csproj" />
+    <ProjectReference Include="..\Blabber.Lib\Blabber.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Grpc.Net.Client" Version="2.80.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.80.0">
+    <PackageReference Include="Grpc.Tools" Version="2.81.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
   </ItemGroup>
 
   <ItemGroup>

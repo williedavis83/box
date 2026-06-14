@@ -7,7 +7,12 @@
     ".": "./src/index.js"
   },
   "dependencies": {
+    "@box-bottom/web-emulation": "file:../../box-bottom/BoxBottom.Web.Emulation",
+    "@foo/blabber-web": "file:../../box-content/Foo.Blabber.Web",
     "@foo/web-hello": "file:../../box-content/Foo.Web.Hello",
     "@foo/web-test": "file:../../box-content/Foo.Web.Test"
+  },
+  "peerDependencies": {
+    "vue-router": "^5.0.0"
   }
 }

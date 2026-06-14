@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { initialTabs } from '@box-pack/web-navigation'
+import { initialTabs } from './initialTabs.js'
 
 /**
  * @param {import('@box-bottom/web-components').TabDefinition} tab
  */
-function tabToRoute(tab) {
+export function tabToRoute(tab) {
   return {
     path: tab.route,
     name: tab.id,
@@ -14,11 +14,12 @@ function tabToRoute(tab) {
 }
 
 const linkTabs = initialTabs.filter((tab) => tab.type === 'link')
+const defaultTab = linkTabs[0]
 
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/hello' },
+    { path: '/', redirect: defaultTab?.route ?? '/hello' },
     ...linkTabs.map(tabToRoute),
   ],
 })

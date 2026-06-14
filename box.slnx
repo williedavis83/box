@@ -4,7 +4,13 @@
     <Project Path="src/box-bottom/BoxBottom.Aspire.Orchestration/BoxBottom.Aspire.Orchestration.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Aspire.ServiceDefaults/BoxBottom.Aspire.ServiceDefaults.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Dapr/BoxBottom.Dapr.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Emulation/BoxBottom.Emulation.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Emulation.Shared/BoxBottom.Emulation.Shared.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Web.Components/BoxBottom.Web.Components.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="src/box-bottom/BoxBottom.Web.Emulation/BoxBottom.Web.Emulation.esproj">
       <Build />
       <Deploy />
     </Project>
@@ -21,8 +27,18 @@
     </Project>
   </Folder>
   <Folder Name="/src/box-content/">
+    <Project Path="src/box-content/Bleeb.Aspire/Bleeb.Aspire.csproj" />
+    <Project Path="src/box-content/Bleeb.Api/Bleeb.Api.csproj" />
+    <Project Path="src/box-content/Bleeb.Emulator.Api/Bleeb.Emulator.Api.csproj" />
+    <Project Path="src/box-content/Blabber.Emulator/Blabber.Emulator.csproj" />
+    <Project Path="src/box-content/Blabber.Lib/Blabber.Lib.csproj" />
     <Project Path="src/box-content/Foo.Primary.Api/Foo.Primary.Api.csproj" />
+    <Project Path="src/box-content/Foo.Primary.Shared/Foo.Primary.Shared.csproj" />
     <Project Path="src/box-content/Foo.Secondary.Api/Foo.Secondary.Api.csproj" />
+    <Project Path="src/box-content/Foo.Blabber.Web/Foo.Blabber.Web.esproj">
+      <Build />
+      <Deploy />
+    </Project>
     <Project Path="src/box-content/Foo.Web.Hello/Foo.Web.Hello.esproj">
       <Build />
       <Deploy />

@@ -12,8 +12,7 @@ import {
   TAB_REGISTRY_KEY,
 } from '@box-bottom/web-components'
 import { brandingConfig } from '@box-pack/web-basics'
-import { initialTabs } from '@box-pack/web-navigation'
-import { addRouteForTab } from './router.js'
+import { addRouteForTab, initialTabs } from '@box-pack/web-navigation'
 
 const componentHost = ref(createComponentHost([]))
 const registry = createTabRegistry(initialTabs, { env: import.meta.env })

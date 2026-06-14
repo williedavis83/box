@@ -7,9 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting" Version="13.4.2" />
-    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.4.2" />
+    <PackageReference Include="Aspire.Hosting" Version="13.4.3" />
+    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.4.3" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Dapr" Version="13.0.0" />
+    <PackageReference Include="MessagePack" Version="3.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BoxBottom.Emulation.Shared\BoxBottom.Emulation.Shared.csproj" />
   </ItemGroup>
 
 </Project>
