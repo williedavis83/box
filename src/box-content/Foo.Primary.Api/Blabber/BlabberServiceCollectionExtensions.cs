@@ -19,24 +19,58 @@ public static class BlabberServiceCollectionExtensions
         services.AddKeyedSingleton<IBlabber>(BlabberKeys.Foo, CreateBlabberFactory(BlabberKeys.Foo));
         services.AddKeyedSingleton<IBlabber>(BlabberKeys.Fee, CreateBlabberFactory(BlabberKeys.Fee));
 
-        services.AddKeyedSingleton<IReadOnlyList<NamedBlabber>>(
-            BlabberKeys.ListA,
-            (sp, _) => CreateNamedBlabberList(sp, BlabberKeys.Foo, BlabberKeys.Fee));
+        AddAnchoredBlabberList(services, BlabberKeys.ListA, BlabberKeys.Foo, BlabberKeys.Fee);
+        AddRealBleebBlabberList(services, BlabberKeys.ListB, BlabberKeys.Foo, BlabberKeys.Fee);
 
-        services.AddKeyedSingleton<IReadOnlyList<NamedBlabber>>(
-            BlabberKeys.ListB,
-            (sp, _) => CreateNamedBlabberListFromBleeb(sp, BlabberKeys.Foo, BlabberKeys.Fee));
-
-        services.AddKeyedSingleton<IReadOnlyDictionary<string, IBlabber>>(
-            BlabberKeys.DictA,
-            (sp, _) => CreateBlabberDictionary(sp, BlabberKeys.Foo, BlabberKeys.Fee));
-
-        services.AddKeyedSingleton<IReadOnlyDictionary<string, IBlabber>>(
-            BlabberKeys.DictB,
-            (sp, _) => CreateBlabberDictionaryFromBleeb(sp, BlabberKeys.Foo, BlabberKeys.Fee));
+        AddAnchoredBlabberDictionary(services, BlabberKeys.DictA, BlabberKeys.Foo, BlabberKeys.Fee);
+        AddRealBleebBlabberDictionary(services, BlabberKeys.DictB, BlabberKeys.Foo, BlabberKeys.Fee);
 
         return services;
     }
+
+    /// <summary>
+    /// Registers a keyed list composed from anchored singleton blabbers (emulation may replace members).
+    /// </summary>
+    private static void AddAnchoredBlabberList(
+        IServiceCollection services,
+        string listKey,
+        params string[] accountKeys) =>
+        services.AddKeyedSingleton<IReadOnlyList<NamedBlabber>>(
+            listKey,
+            (sp, _) => CreateNamedBlabberListFromAnchors(sp, accountKeys));
+
+    /// <summary>
+    /// Registers a keyed list that always uses real Bleeb clients, bypassing anchored singleton resolution.
+    /// </summary>
+    private static void AddRealBleebBlabberList(
+        IServiceCollection services,
+        string listKey,
+        params string[] accounts) =>
+        services.AddKeyedSingleton<IReadOnlyList<NamedBlabber>>(
+            listKey,
+            (sp, _) => CreateNamedBlabberListFromBleeb(sp, accounts));
+
+    /// <summary>
+    /// Registers a keyed dictionary composed from anchored singleton blabbers (emulation may replace members).
+    /// </summary>
+    private static void AddAnchoredBlabberDictionary(
+        IServiceCollection services,
+        string dictionaryKey,
+        params string[] accountKeys) =>
+        services.AddKeyedSingleton<IReadOnlyDictionary<string, IBlabber>>(
+            dictionaryKey,
+            (sp, _) => CreateBlabberDictionaryFromAnchors(sp, accountKeys));
+
+    /// <summary>
+    /// Registers a keyed dictionary that always uses real Bleeb clients, bypassing anchored singleton resolution.
+    /// </summary>
+    private static void AddRealBleebBlabberDictionary(
+        IServiceCollection services,
+        string dictionaryKey,
+        params string[] accounts) =>
+        services.AddKeyedSingleton<IReadOnlyDictionary<string, IBlabber>>(
+            dictionaryKey,
+            (sp, _) => CreateBlabberDictionaryFromBleeb(sp, accounts));
 
     private static Func<IServiceProvider, object?, IBlabber> CreateBlabberFactory(string account) =>
         (serviceProvider, _) =>
@@ -52,7 +86,7 @@ public static class BlabberServiceCollectionExtensions
             return new global::Blabber.Lib.Blabber(account, options.BaseUri, httpClient);
         };
 
-    private static IReadOnlyList<NamedBlabber> CreateNamedBlabberList(
+    private static IReadOnlyList<NamedBlabber> CreateNamedBlabberListFromAnchors(
         IServiceProvider serviceProvider,
         params string[] accounts) =>
         accounts
@@ -70,7 +104,7 @@ public static class BlabberServiceCollectionExtensions
                 CreateBlabberFactory(account)(serviceProvider, null)))
             .ToList();
 
-    private static IReadOnlyDictionary<string, IBlabber> CreateBlabberDictionary(
+    private static IReadOnlyDictionary<string, IBlabber> CreateBlabberDictionaryFromAnchors(
         IServiceProvider serviceProvider,
         params string[] accounts) =>
         accounts.ToDictionary(

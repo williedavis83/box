@@ -4,5 +4,5 @@ namespace Blabber.Emulator.Configuration;
 
 public sealed class BlabberEmulatorHostedServiceConfig
 {
-    public BlabberEmulatorOptions Options { get; init; } = new();
+    public List<BlabberEmulatorAccount> Accounts { get; init; } = [];
 }

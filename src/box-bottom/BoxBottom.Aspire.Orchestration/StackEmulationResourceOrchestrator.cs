@@ -7,28 +7,24 @@ namespace BoxBottom.Aspire.Orchestration;
 public sealed class StackEmulationResourceOrchestrator : IEmulationResourceOrchestrator
 {
     private readonly StackOperations _stackOperations;
-    private readonly Dictionary<string, EmulationOrchestratedResource> _orchestratedResources;
-    private readonly Dictionary<string, IResourceBuilder<ProjectResource>> _orchestratedResourceBuilders;
+    private readonly EmulationOrchestrationState _orchestrationState;
 
     public StackEmulationResourceOrchestrator(
         StackOperations stackOperations,
-        Dictionary<string, EmulationOrchestratedResource> orchestratedResources,
-        Dictionary<string, IResourceBuilder<ProjectResource>> orchestratedResourceBuilders)
+        EmulationOrchestrationState orchestrationState)
     {
         ArgumentNullException.ThrowIfNull(stackOperations);
-        ArgumentNullException.ThrowIfNull(orchestratedResources);
-        ArgumentNullException.ThrowIfNull(orchestratedResourceBuilders);
+        ArgumentNullException.ThrowIfNull(orchestrationState);
 
         _stackOperations = stackOperations;
-        _orchestratedResources = orchestratedResources;
-        _orchestratedResourceBuilders = orchestratedResourceBuilders;
+        _orchestrationState = orchestrationState;
     }
 
     public bool TryGetOrchestratedResource(string resourceName, out EmulationOrchestratedResource resource)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
 
-        return _orchestratedResources.TryGetValue(resourceName, out resource!);
+        return _orchestrationState.Resources.TryGetValue(resourceName, out resource!);
     }
 
     public EmulationOrchestratedResource OrchestrateSupportProject(string resourceName, string projectPath)
@@ -36,7 +32,7 @@ public sealed class StackEmulationResourceOrchestrator : IEmulationResourceOrche
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
         ArgumentException.ThrowIfNullOrWhiteSpace(projectPath);
 
-        if (_orchestratedResources.TryGetValue(resourceName, out var existing))
+        if (_orchestrationState.Resources.TryGetValue(resourceName, out var existing))
         {
             return existing;
         }
@@ -48,8 +44,8 @@ public sealed class StackEmulationResourceOrchestrator : IEmulationResourceOrche
             resourceName,
             EdgeRoutingConfiguration.BuildApiClusterAddress(resourceName));
 
-        _orchestratedResources[resourceName] = orchestratedResource;
-        _orchestratedResourceBuilders[resourceName] = resourceBuilder;
+        _orchestrationState.Resources[resourceName] = orchestratedResource;
+        _orchestrationState.ResourceBuilders[resourceName] = resourceBuilder;
         return orchestratedResource;
     }
 }

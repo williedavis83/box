@@ -4,14 +4,14 @@ using Blabber.Lib;
 using BoxBottom.Emulation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Blabber.Emulator;
 
 public static class BlabberEmulationRegistryExtensions
 {
     public const string BlabberEmulationKey = "Blabber_Emulation";
+
+    private static readonly BlabberEmulationDocumentApplier DocumentApplier = new();
 
     public static void RegisterBlabberEmulation(this IEmulationRegistry registry)
     {
@@ -26,21 +26,21 @@ public static class BlabberEmulationRegistryExtensions
             new EmulatorServiceFactory<IBlabber, BlabberEmulatorAnchorConfig>(
                 BlabberEmulationFactories.CreateEmulatedBlabber),
             new EmulatorHostedServiceFactory<BleebEmulatorSeedHostedService, BlabberEmulatorHostedServiceConfig>(
-                BlabberEmulationFactories.CreateSeedHostedService));
+                BlabberEmulationFactories.CreateSeedHostedService),
+            DocumentApplier);
     }
 
-    public static IHostApplicationBuilder RegisterBlabberEmulation(this IHostApplicationBuilder builder)
+    public static IEmulationBuilder RegisterBlabberEmulation(this IEmulationBuilder emulationBuilder)
     {
-        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(emulationBuilder);
 
-        if (builder.Environment.IsProduction())
+        if (emulationBuilder.HostBuilder.Environment.IsProduction())
         {
-            return builder;
+            return emulationBuilder;
         }
 
-        builder.Services.AddSingleton<IEmulationRegistryConfigurator, BlabberEmulationRegistryConfigurator>();
-        builder.Services.AddSingleton<IEmulationConfigurationApplier, BlabberEmulationConfigurationApplier>();
-        return builder;
+        emulationBuilder.AddRegistryConfigurator(new BlabberEmulationRegistryConfigurator());
+        return emulationBuilder;
     }
 
     private sealed class BlabberEmulationRegistryConfigurator : IEmulationRegistryConfigurator

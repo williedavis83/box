@@ -10,9 +10,10 @@ builder.AddServiceDefaults();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddBlabbers(builder.Configuration);
-builder.RegisterBlabberEmulation();
-builder.EnableEmulationSupport(typeof(BlabberController).Assembly);
-builder.ApplyConfiguredEmulation();
+
+builder.AddEmulation(typeof(BlabberController).Assembly)
+    .RegisterBlabberEmulation()
+    .ApplyConfiguredEmulation();
 
 var app = builder.Build();
 

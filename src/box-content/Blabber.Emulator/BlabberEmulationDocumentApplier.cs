@@ -13,23 +13,23 @@ using Microsoft.Extensions.Options;
 
 namespace Blabber.Emulator;
 
-public sealed class BlabberEmulationConfigurationApplier : IEmulationConfigurationApplier
+public sealed class BlabberEmulationDocumentApplier : IEmulationRegistryEntryApplier
 {
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
     };
 
-    public string EmulationKey => BlabberEmulationRegistryExtensions.BlabberEmulationKey;
-
     public void Apply(
         IHostApplicationBuilder builder,
         JsonDocument jsonDocument,
-        IEmulationAnchorRepository anchorRepository)
+        IEmulationAnchorRepository anchorRepository,
+        EmulationRegistryEntry entry)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(jsonDocument);
         ArgumentNullException.ThrowIfNull(anchorRepository);
+        ArgumentNullException.ThrowIfNull(entry);
 
         var document = jsonDocument.Deserialize<EmulationConfigDocument<BlabberEmulatorAnchorConfig, BlabberEmulatorHostedServiceConfig>>(
             SerializerOptions);
@@ -39,7 +39,19 @@ public sealed class BlabberEmulationConfigurationApplier : IEmulationConfigurati
             throw new InvalidOperationException("The Blabber emulation JSON document could not be deserialized.");
         }
 
+        builder.Services.Configure<BlabberEmulatorOptions>(
+            builder.Configuration.GetSection(BlabberEmulatorOptions.SectionName));
         builder.Services.AddHttpClient(BleebEmulatorSeedHostedService.HttpClientName);
+
+        var serviceFactory = entry.GetServiceFactory<IBlabber, BlabberEmulatorAnchorConfig>();
+        var hostedServiceFactory = entry.GetHostedServiceFactory<
+            BleebEmulatorSeedHostedService,
+            BlabberEmulatorHostedServiceConfig>();
+
+        if (hostedServiceFactory is null)
+        {
+            throw new InvalidOperationException("The Blabber emulation registry entry is missing a hosted service factory.");
+        }
 
         var singletonDocument = new EmulationConfigDocument<BlabberEmulatorAnchorConfig, BlabberEmulatorHostedServiceConfig>
         {
@@ -49,13 +61,7 @@ public sealed class BlabberEmulationConfigurationApplier : IEmulationConfigurati
 
         using var singletonJson = JsonDocument.Parse(JsonSerializer.Serialize(singletonDocument, SerializerOptions));
 
-        var serviceFactory = new EmulatorServiceFactory<IBlabber, BlabberEmulatorAnchorConfig>(
-            BlabberEmulationFactories.CreateEmulatedBlabber);
-        var hostedServiceFactory = new EmulatorHostedServiceFactory<
-            BleebEmulatorSeedHostedService,
-            BlabberEmulatorHostedServiceConfig>(BlabberEmulationFactories.CreateSeedHostedService);
-
-        var remapper = new EmulationRemapper<
+        var remapper = new EmulationHostedServiceRemapper<
             BlabberEmulatorAnchorConfig,
             BleebEmulatorSeedHostedService,
             BlabberEmulatorHostedServiceConfig>(
@@ -139,10 +145,9 @@ internal static class BlabberEmulationFactories
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
         var emulatorBaseUri = serviceProvider
-            .GetRequiredService<IConfiguration>()
-            .GetSection(BlabberEmulatorOptions.SectionName)
-            .Get<BlabberEmulatorOptions>()
-            ?.BleebEmulatorBaseUri;
+            .GetRequiredService<IOptions<BlabberEmulatorOptions>>()
+            .Value
+            .BleebEmulatorBaseUri;
 
         if (emulatorBaseUri is null)
         {
@@ -164,8 +169,18 @@ internal static class BlabberEmulationFactories
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
+        var configuredOptions = serviceProvider
+            .GetRequiredService<IOptions<BlabberEmulatorOptions>>()
+            .Value;
+
+        var options = new BlabberEmulatorOptions
+        {
+            BleebEmulatorBaseUri = configuredOptions.BleebEmulatorBaseUri,
+            Accounts = config.Accounts,
+        };
+
         return new BleebEmulatorSeedHostedService(
-            Microsoft.Extensions.Options.Options.Create(config.Options),
+            Microsoft.Extensions.Options.Options.Create(options),
             serviceProvider.GetRequiredService<IHttpClientFactory>(),
             serviceProvider.GetRequiredService<ILogger<BleebEmulatorSeedHostedService>>());
     }

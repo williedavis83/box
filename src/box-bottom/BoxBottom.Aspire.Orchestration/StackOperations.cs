@@ -18,6 +18,8 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
     private IResourceBuilder<CategoryResource>? _toolsCategory;
     private IResourceBuilder<CategoryResource>? _supportCategory;
 
+    public EmulationOrchestrationState Emulation { get; } = new();
+
     public StackDefinition CreateStackDefinition(string name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);

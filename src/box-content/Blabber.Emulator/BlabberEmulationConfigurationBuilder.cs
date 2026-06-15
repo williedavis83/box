@@ -17,7 +17,6 @@ public sealed class BlabberEmulationConfigurationBuilder
         new(StringComparer.OrdinalIgnoreCase);
 
     private readonly List<BlabberEmulatorAccount> _seedAccounts = [];
-    private EmulationOrchestratedResource? _emulatorResource;
 
     public string EmulationKey => BlabberEmulationRegistryExtensions.BlabberEmulationKey;
 
@@ -73,23 +72,18 @@ public sealed class BlabberEmulationConfigurationBuilder
 
         if (orchestrator.TryGetOrchestratedResource(
                 BleebEmulatorOrchestrationConfiguration.ResourceName,
-                out var existing))
+                out _))
         {
-            _emulatorResource = existing;
             return;
         }
 
-        _emulatorResource = orchestrator.OrchestrateSupportProject(
+        orchestrator.OrchestrateSupportProject(
             BleebEmulatorOrchestrationConfiguration.ResourceName,
             BleebEmulatorOrchestrationConfiguration.ApiProjectPath);
     }
 
     public EmulationConfigDocument<BlabberEmulatorAnchorConfig, BlabberEmulatorHostedServiceConfig> BuildDocument()
     {
-        var emulatorBaseUri = _emulatorResource?.ServiceAddress is null
-            ? null
-            : new Uri(_emulatorResource.ServiceAddress, UriKind.Absolute);
-
         return new EmulationConfigDocument<BlabberEmulatorAnchorConfig, BlabberEmulatorHostedServiceConfig>
         {
             Singletons = new Dictionary<string, BlabberEmulatorAnchorConfig>(_singletons, StringComparer.OrdinalIgnoreCase),
@@ -109,11 +103,7 @@ public sealed class BlabberEmulationConfigurationBuilder
                 ? null
                 : new BlabberEmulatorHostedServiceConfig
                 {
-                    Options = new BlabberEmulatorOptions
-                    {
-                        BleebEmulatorBaseUri = emulatorBaseUri,
-                        Accounts = [.._seedAccounts],
-                    },
+                    Accounts = [.._seedAccounts],
                 },
         };
     }

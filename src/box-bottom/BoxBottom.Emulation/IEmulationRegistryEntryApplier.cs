@@ -3,12 +3,11 @@ using Microsoft.Extensions.Hosting;
 
 namespace BoxBottom.Emulation;
 
-public interface IEmulationConfigurationApplier
+public interface IEmulationRegistryEntryApplier
 {
-    string EmulationKey { get; }
-
     void Apply(
         IHostApplicationBuilder builder,
         JsonDocument jsonDocument,
-        IEmulationAnchorRepository anchorRepository);
+        IEmulationAnchorRepository anchorRepository,
+        EmulationRegistryEntry entry);
 }

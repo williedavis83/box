@@ -9,25 +9,29 @@ public sealed class EmulationRegistry : IEmulationRegistry
 
     public void Register<TService, TServiceConfig>(
         string key,
-        EmulatorServiceFactory<TService, TServiceConfig> serviceFactory)
+        EmulatorServiceFactory<TService, TServiceConfig> serviceFactory,
+        IEmulationRegistryEntryApplier entryApplier)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentNullException.ThrowIfNull(serviceFactory);
+        ArgumentNullException.ThrowIfNull(entryApplier);
 
-        _entries[key] = new EmulationRegistryEntry(serviceFactory);
+        _entries[key] = new EmulationRegistryEntry(serviceFactory, entryApplier);
     }
 
     public void Register<TService, TServiceConfig, THostedService, THostedServiceConfig>(
         string key,
         EmulatorServiceFactory<TService, TServiceConfig> serviceFactory,
-        EmulatorHostedServiceFactory<THostedService, THostedServiceConfig> hostedServiceFactory)
+        EmulatorHostedServiceFactory<THostedService, THostedServiceConfig> hostedServiceFactory,
+        IEmulationRegistryEntryApplier entryApplier)
         where THostedService : class, IHostedService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         ArgumentNullException.ThrowIfNull(serviceFactory);
         ArgumentNullException.ThrowIfNull(hostedServiceFactory);
+        ArgumentNullException.ThrowIfNull(entryApplier);
 
-        _entries[key] = new EmulationRegistryEntry(serviceFactory, hostedServiceFactory);
+        _entries[key] = new EmulationRegistryEntry(serviceFactory, entryApplier, hostedServiceFactory);
     }
 
     public bool TryGet(string key, out EmulationRegistryEntry entry)

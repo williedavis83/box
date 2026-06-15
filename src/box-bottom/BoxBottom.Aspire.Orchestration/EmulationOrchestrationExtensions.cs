@@ -12,12 +12,6 @@ public static class EmulationOrchestrationExtensions
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    private static readonly Dictionary<string, EmulationOrchestratedResource> OrchestratedResources =
-        new(StringComparer.OrdinalIgnoreCase);
-
-    private static readonly Dictionary<string, IResourceBuilder<ProjectResource>> OrchestratedResourceBuilders =
-        new(StringComparer.OrdinalIgnoreCase);
-
     public static ApiProjectOptions WithEmulation<TEmulatorConfig, THostedServiceConfig>(
         this ApiProjectOptions options,
         StackOperations stackOperations,
@@ -29,8 +23,7 @@ public static class EmulationOrchestrationExtensions
 
         var orchestrator = new StackEmulationResourceOrchestrator(
             stackOperations,
-            OrchestratedResources,
-            OrchestratedResourceBuilders);
+            stackOperations.Emulation);
         builder.OrchestrateEmulationResources(orchestrator);
 
         var document = builder.BuildDocument();
@@ -54,8 +47,8 @@ public static class EmulationOrchestrationExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(primaryApiLogicalName);
         ArgumentException.ThrowIfNullOrWhiteSpace(environmentVariableName);
 
-        if (!OrchestratedResources.TryGetValue(resourceName, out var orchestratedResource)
-            || !OrchestratedResourceBuilders.TryGetValue(resourceName, out var resourceBuilder))
+        if (!stackOperations.Emulation.Resources.TryGetValue(resourceName, out var orchestratedResource)
+            || !stackOperations.Emulation.ResourceBuilders.TryGetValue(resourceName, out var resourceBuilder))
         {
             return;
         }

@@ -160,7 +160,7 @@ public class EmulationRemapperTests
         var repository = new EmulationAnchorRepository();
 
         var services = new ServiceCollection();
-        var remapper = new EmulationRemapper<WidgetConfig, TestHostedService, HostedServiceConfig>(
+        var remapper = new EmulationHostedServiceRemapper<WidgetConfig, TestHostedService, HostedServiceConfig>(
             repository,
             new EmulatorServiceFactory<IWidget, WidgetConfig>((config, _) => new Widget($"fake:{config.Label}")),
             new EmulatorHostedServiceFactory<TestHostedService, HostedServiceConfig>(
@@ -182,7 +182,7 @@ public class EmulationRemapperTests
         Assert.Equal("seed", hostedServices[0].Label);
     }
 
-    private static EmulationRemapper<WidgetConfig, NoOpHostedService, object> CreateRemapper(
+    private static EmulationRemapper<WidgetConfig> CreateRemapper(
         EmulationAnchorRepository repository) =>
         new(
             repository,
@@ -215,13 +215,6 @@ public class EmulationRemapperTests
     private sealed record WidgetConfig(string Label);
 
     private sealed record HostedServiceConfig(string Label);
-
-    private sealed class NoOpHostedService : IHostedService
-    {
-        public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-    }
 
     private sealed class TestHostedService(string label) : IHostedService
     {

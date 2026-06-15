@@ -41,8 +41,8 @@ public class BlabberEmulationConfigurationBuilderTests
         Assert.Equal(["bob-foo", "bob-fee"], document.Lists[BlabberKeys.ListA].Select(config => config.Account));
         Assert.Equal("bob-foo", document.Dictionaries[BlabberKeys.DictA]["bob-foo"].Account);
         Assert.Equal("bob-fee", document.Dictionaries[BlabberKeys.DictA]["bob-fee"].Account);
-        Assert.Equal(new Uri("http://bleeb-emulator-api"), document.HostedServiceConfig!.Options.BleebEmulatorBaseUri);
-        Assert.Equal(2, document.HostedServiceConfig.Options.Accounts.Count);
+        Assert.Equal(2, document.HostedServiceConfig!.Accounts.Count);
+        Assert.Equal("bob-for", document.HostedServiceConfig.Accounts.Single(account => account.Account == "bob-foo").Bar);
         Assert.Equal(1, orchestrator.OrchestrateSupportProjectCallCount);
     }
 

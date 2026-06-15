@@ -1,12 +1,10 @@
 using System.Text.Json;
 using BoxBottom.Emulation.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace BoxBottom.Emulation;
 
-public sealed class EmulationRemapper<TEmulatorConfig, THostedService, THostedServiceConfig> : IEmulationRemapper
-    where THostedService : class, IHostedService
+public sealed class EmulationRemapper<TEmulatorConfig> : IEmulationRemapper
 {
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -15,7 +13,6 @@ public sealed class EmulationRemapper<TEmulatorConfig, THostedService, THostedSe
 
     private readonly IEmulationAnchorRepository _anchorRepository;
     private readonly IEmulatorServiceFactory<TEmulatorConfig> _serviceFactory;
-    private readonly EmulatorHostedServiceFactory<THostedService, THostedServiceConfig>? _hostedServiceFactory;
 
     public EmulationRemapper(
         IEmulationAnchorRepository anchorRepository,
@@ -28,26 +25,12 @@ public sealed class EmulationRemapper<TEmulatorConfig, THostedService, THostedSe
         _serviceFactory = serviceFactory;
     }
 
-    public EmulationRemapper(
-        IEmulationAnchorRepository anchorRepository,
-        IEmulatorServiceFactory<TEmulatorConfig> serviceFactory,
-        EmulatorHostedServiceFactory<THostedService, THostedServiceConfig> hostedServiceFactory)
-    {
-        ArgumentNullException.ThrowIfNull(anchorRepository);
-        ArgumentNullException.ThrowIfNull(serviceFactory);
-        ArgumentNullException.ThrowIfNull(hostedServiceFactory);
-
-        _anchorRepository = anchorRepository;
-        _serviceFactory = serviceFactory;
-        _hostedServiceFactory = hostedServiceFactory;
-    }
-
     public void RemapInjection(IServiceCollection services, JsonDocument jsonDocument)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(jsonDocument);
 
-        var document = jsonDocument.Deserialize<EmulationConfigDocument<TEmulatorConfig, THostedServiceConfig>>(
+        var document = jsonDocument.Deserialize<EmulationConfigDocument<TEmulatorConfig, object>>(
             SerializerOptions);
 
         if (document is null)
@@ -105,18 +88,6 @@ public sealed class EmulationRemapper<TEmulatorConfig, THostedService, THostedSe
                 (sp, _) => _serviceFactory.CreateDictionary(configs, sp));
             _anchorRepository.MarkActivated(anchorName);
         }
-
-        if (document.HostedServiceConfig is not null)
-        {
-            if (_hostedServiceFactory is null)
-            {
-                throw new InvalidOperationException(
-                    "The emulation document includes hosted service configuration, but no hosted service factory was provided.");
-            }
-
-            services.AddHostedService<THostedService>(sp =>
-                _hostedServiceFactory.CreateSingleton(document.HostedServiceConfig, sp));
-        }
     }
 
     private static bool TryGetAnchor(
@@ -130,11 +101,6 @@ public sealed class EmulationRemapper<TEmulatorConfig, THostedService, THostedSe
             return false;
         }
 
-        if (anchor.Kind != expectedKind)
-        {
-            return false;
-        }
-
-        return true;
+        return anchor.Kind == expectedKind;
     }
 }
