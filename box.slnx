@@ -3,6 +3,7 @@
   <Folder Name="/src/box-bottom/">
     <Project Path="src/box-bottom/BoxBottom.Aspire.Orchestration/BoxBottom.Aspire.Orchestration.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Aspire.ServiceDefaults/BoxBottom.Aspire.ServiceDefaults.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Azure.Table/BoxBottom.Azure.Table.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Dapr/BoxBottom.Dapr.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Emulation/BoxBottom.Emulation.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Emulation.Shared/BoxBottom.Emulation.Shared.csproj" />
@@ -35,6 +36,10 @@
     <Project Path="src/box-content/Foo.Primary.Api/Foo.Primary.Api.csproj" />
     <Project Path="src/box-content/Foo.Primary.Shared/Foo.Primary.Shared.csproj" />
     <Project Path="src/box-content/Foo.Secondary.Api/Foo.Secondary.Api.csproj" />
+    <Project Path="src/box-content/Foo.AzureTable.Web/Foo.AzureTable.Web.esproj">
+      <Build />
+      <Deploy />
+    </Project>
     <Project Path="src/box-content/Foo.Blabber.Web/Foo.Blabber.Web.esproj">
       <Build />
       <Deploy />
