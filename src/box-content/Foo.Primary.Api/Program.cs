@@ -1,6 +1,7 @@
+using AzureTable.Emulator;
 using Blabber.Emulator;
-using BoxBottom.Azure.Table;
 using BoxBottom.Emulation;
+using Foo.Primary.Api.AzureTable;
 using Foo.Primary.Api.Blabber;
 using Foo.Primary.Api.Controllers;
 
@@ -11,10 +12,11 @@ builder.AddServiceDefaults();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddBlabbers(builder.Configuration);
-builder.Services.AddAzureTableStorage(builder.Configuration);
+builder.Services.AddFooAzureTableScenarios(builder.Configuration);
 
-builder.AddEmulation(typeof(BlabberController).Assembly)
+builder.AddEmulation(typeof(BlabberController).Assembly, typeof(AzureTableBasicsController).Assembly)
     .RegisterBlabberEmulation()
+    .RegisterAzureTableEmulation()
     .ApplyConfiguredEmulation();
 
 var app = builder.Build();

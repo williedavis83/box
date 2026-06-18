@@ -28,6 +28,8 @@
     </Project>
   </Folder>
   <Folder Name="/src/box-content/">
+    <Project Path="src/box-content/AzureTable.Aspire/AzureTable.Aspire.csproj" />
+    <Project Path="src/box-content/AzureTable.Emulator/AzureTable.Emulator.csproj" />
     <Project Path="src/box-content/Bleeb.Aspire/Bleeb.Aspire.csproj" />
     <Project Path="src/box-content/Bleeb.Api/Bleeb.Api.csproj" />
     <Project Path="src/box-content/Bleeb.Emulator.Api/Bleeb.Emulator.Api.csproj" />

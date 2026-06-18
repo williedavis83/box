@@ -3,9 +3,13 @@ using Blabber.Emulator;
 using BoxBottom.Emulation;
 using Foo.Primary.Api.Controllers;
 using Foo.Primary.Api.Blabber;
+using BoxBottom.Azure.Table;
+using BoxBottom.Azure.Table.Services;
+using Foo.Primary.Shared.AzureTable;
 using Foo.Primary.Shared.Blabber;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -89,8 +93,15 @@ public class EmulationStartupTests
 
         var anchors = await client.GetFromJsonAsync<List<EmulationAnchorDiagnostic>>("/api/emulation/anchors");
 
-        Assert.Equal(3, anchors!.Count);
-        Assert.All(anchors, anchor => Assert.False(anchor.IsActivated));
+        Assert.Equal(8, anchors!.Count);
+        Assert.All(
+            anchors.Where(anchor =>
+                anchor.AnchorName is not AzureTableKeys.Orders
+                and not AzureTableKeys.Analytics
+                and not AzureTableKeys.GeoUsEast
+                and not AzureTableKeys.GeoEuWest
+                and not AzureTableKeys.GeoReplicas),
+            anchor => Assert.False(anchor.IsActivated));
     }
 
     [Fact]
@@ -101,8 +112,10 @@ public class EmulationStartupTests
 
         var anchors = await client.GetFromJsonAsync<List<EmulationAnchorDiagnostic>>("/api/emulation/anchors");
 
-        Assert.Equal(3, anchors!.Count);
+        Assert.Equal(8, anchors!.Count);
         Assert.True(anchors.Single(anchor => anchor.AnchorName == BlabberKeys.Foo).IsActivated);
+        Assert.True(anchors.Single(anchor => anchor.AnchorName == AzureTableKeys.Orders).IsActivated);
+        Assert.True(anchors.Single(anchor => anchor.AnchorName == AzureTableKeys.GeoReplicas).IsActivated);
         Assert.True(anchors.Single(anchor => anchor.AnchorName == BlabberKeys.ListA).IsActivated);
         Assert.True(anchors.Single(anchor => anchor.AnchorName == BlabberKeys.DictA).IsActivated);
     }
@@ -124,17 +137,35 @@ public class EmulationStartupTests
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.ConfigureTestServices(services =>
+            {
+                var bootstrapDescriptors = services
+                    .Where(descriptor => descriptor.ImplementationType == typeof(AzureTableBootstrapHostedService))
+                    .ToList();
+
+                foreach (var descriptor in bootstrapDescriptors)
+                {
+                    services.Remove(descriptor);
+                }
+            });
+
             builder.UseEnvironment(Environments.Development);
             builder.UseSetting("Bleeb:BaseUri", "http://bleeb.test/");
+            builder.UseSetting("AzureTableAccounts:table-orders:ServiceUri", "https://example.table.core.windows.net/");
+            builder.UseSetting("AzureTableAccounts:table-analytics:ServiceUri", "https://example.table.core.windows.net/");
+            builder.UseSetting("AzureTableAccounts:table-geo-us-east:ServiceUri", "https://example.table.core.windows.net/");
+            builder.UseSetting("AzureTableAccounts:table-geo-eu-west:ServiceUri", "https://example.table.core.windows.net/");
 
             if (_includeEmulation)
             {
                 builder.UseSetting("BlabberEmulator:BleebEmulatorBaseUri", "http://bleeb-emulator.test/");
-                builder.UseSetting("Blabber_Emulation", BobEmulationJson);
+                builder.UseSetting("AzureTableConnectionString:ConnectionString", "UseDevelopmentStorage=true");
+                builder.UseSetting("Blabber_Emulation", BobBlabberEmulationJson);
+                builder.UseSetting("AzureTable_Emulation", BobAzureTableEmulationJson);
             }
         }
 
-        private const string BobEmulationJson =
+        private const string BobBlabberEmulationJson =
             """
             {
               "singletons": {
@@ -147,6 +178,24 @@ public class EmulationStartupTests
                 "dict-a": {
                   "foo": { "account": "foo" },
                   "bob-fee": { "account": "bob-fee" }
+                }
+              }
+            }
+            """;
+
+        private const string BobAzureTableEmulationJson =
+            """
+            {
+              "singletons": {
+                "table-orders": {},
+                "table-analytics": {},
+                "table-geo-us-east": {},
+                "table-geo-eu-west": {}
+              },
+              "dictionaries": {
+                "table-geo-replicas": {
+                  "us-east": { "memberAnchorKey": "table-geo-us-east" },
+                  "eu-west": { "memberAnchorKey": "table-geo-eu-west" }
                 }
               }
             }

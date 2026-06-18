@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Aspire.Orchestration\BoxBottom.Aspire.Orchestration.csproj" />
+    <ProjectReference Include="..\..\box-content\AzureTable.Aspire\AzureTable.Aspire.csproj" />
+    <ProjectReference Include="..\..\box-content\AzureTable.Emulator\AzureTable.Emulator.csproj" />
     <ProjectReference Include="..\..\box-content\Bleeb.Aspire\Bleeb.Aspire.csproj" />
     <ProjectReference Include="..\..\box-content\Blabber.Emulator\Blabber.Emulator.csproj" />
     <ProjectReference Include="..\..\box-content\Foo.Primary.Shared\Foo.Primary.Shared.csproj" />

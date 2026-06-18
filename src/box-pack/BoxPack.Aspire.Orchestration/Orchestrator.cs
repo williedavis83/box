@@ -1,6 +1,9 @@
+using AzureTable.Aspire;
+using AzureTable.Emulator;
 using Bleeb.Aspire;
 using Blabber.Emulator;
 using BoxBottom.Aspire.Orchestration;
+using Foo.Primary.Shared.AzureTable;
 using Foo.Primary.Shared.Blabber;
 
 namespace BoxPack.Aspire.Orchestration;
@@ -52,6 +55,17 @@ public static class Orchestrator
                 });
 
         bobStack["primary-api"].WithEmulation(stackOperations, bobBlabberEmulation);
+        bobStack["primary-api"].WithAzureTableEmulation(
+            stackOperations,
+            builder => builder
+                .OverrideSingleton(AzureTableKeys.Orders)
+                .OverrideSingleton(AzureTableKeys.Analytics)
+                .OverrideSingleton(AzureTableKeys.GeoUsEast)
+                .OverrideSingleton(AzureTableKeys.GeoEuWest)
+                .OverrideDictionary(
+                    AzureTableKeys.GeoReplicas,
+                    (AzureTableGeoKeys.UsEast, AzureTableKeys.GeoUsEast),
+                    (AzureTableGeoKeys.EuWest, AzureTableKeys.GeoEuWest)));
 
         var stacks = new Dictionary<string, StackResources>(StringComparer.OrdinalIgnoreCase)
         {
@@ -68,6 +82,12 @@ public static class Orchestrator
             BleebEmulatorOrchestrationConfiguration.ResourceName,
             BleebOrchestrationConfiguration.PrimaryApiLogicalName,
             BleebEmulatorOrchestrationConfiguration.EmulatorBaseUriEnvironmentVariable,
+            BobStackName);
+
+        AzuriteOrchestrator.WireToPrimaryApis(
+            stackOperations,
+            stacks,
+            BleebOrchestrationConfiguration.PrimaryApiLogicalName,
             BobStackName);
 
         return stacks;
