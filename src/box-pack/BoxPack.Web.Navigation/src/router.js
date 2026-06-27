@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { userProfileTab } from '@box-pack/users-web'
 import { initialTabs } from './initialTabs.js'
 
 /**
@@ -21,6 +22,7 @@ export const router = createRouter({
   routes: [
     { path: '/', redirect: defaultTab?.route ?? '/hello' },
     ...linkTabs.map(tabToRoute),
+    tabToRoute(userProfileTab),
   ],
 })
 

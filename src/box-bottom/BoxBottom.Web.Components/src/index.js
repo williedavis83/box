@@ -7,6 +7,8 @@ export { default as LinkTab } from './components/LinkTab.vue'
 export { default as MenuTab } from './components/MenuTab.vue'
 export { default as HeaderPlaceholder } from './components/HeaderPlaceholder.vue'
 
+export { createUserMenuRegistry, useUserMenuRegistry, USER_MENU_REGISTRY_KEY } from './userMenu/useUserMenuRegistry.js'
+
 export { createTabRegistry, useTabRegistry, TAB_REGISTRY_KEY, REGISTER_DYNAMIC_TAB_KEY } from './tabs/useTabRegistry.js'
 export { isTabVisible, isTabEnabled, filterVisibleTabs, filterEnabledTabs } from './tabs/tabPredicates.js'
 export { splitTabsForOverflow } from './tabs/tabOverflow.js'

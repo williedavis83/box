@@ -1,3 +1,4 @@
+using Azure.Data.Tables;
 using BoxBottom.Azure.Table.Models;
 
 namespace BoxBottom.Azure.Table;
@@ -16,6 +17,13 @@ public interface IAzureTableService
         string rowKey,
         CancellationToken cancellationToken = default);
 
+    Task<TEntity?> GetEntityAsync<TEntity>(
+        string tableName,
+        string partitionKey,
+        string rowKey,
+        CancellationToken cancellationToken = default)
+        where TEntity : class, ITableEntity, new();
+
     Task<IReadOnlyList<AzureTableEntityResult>> QueryEntitiesAsync(
         string tableName,
         int? maxResults = null,
@@ -25,4 +33,10 @@ public interface IAzureTableService
         string tableName,
         AzureTableUpsertEntityRequest entity,
         CancellationToken cancellationToken = default);
+
+    Task UpsertEntityAsync<TEntity>(
+        string tableName,
+        TEntity entity,
+        CancellationToken cancellationToken = default)
+        where TEntity : ITableEntity;
 }

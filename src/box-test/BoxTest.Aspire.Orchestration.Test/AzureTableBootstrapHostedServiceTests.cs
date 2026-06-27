@@ -1,3 +1,4 @@
+using Azure.Data.Tables;
 using BoxBottom.Azure.Table;
 using BoxBottom.Azure.Table.Models;
 using BoxBottom.Azure.Table.Options;
@@ -124,6 +125,14 @@ public class AzureTableBootstrapHostedServiceTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult<AzureTableEntityResult?>(null);
 
+        public Task<TEntity?> GetEntityAsync<TEntity>(
+            string tableName,
+            string partitionKey,
+            string rowKey,
+            CancellationToken cancellationToken = default)
+            where TEntity : class, ITableEntity, new() =>
+            Task.FromResult<TEntity?>(null);
+
         public Task<IReadOnlyList<AzureTableEntityResult>> QueryEntitiesAsync(
             string tableName,
             int? maxResults = null,
@@ -134,6 +143,13 @@ public class AzureTableBootstrapHostedServiceTests
             string tableName,
             AzureTableUpsertEntityRequest entity,
             CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task UpsertEntityAsync<TEntity>(
+            string tableName,
+            TEntity entity,
+            CancellationToken cancellationToken = default)
+            where TEntity : ITableEntity =>
             Task.CompletedTask;
     }
 }

@@ -15,7 +15,9 @@ defineProps({
   <header class="box-header">
     <BrandingComponent :branding="branding" />
     <TabMenu class="box-header__tabs" />
-    <HeaderPlaceholder class="box-header__placeholder" />
+    <HeaderPlaceholder class="box-header__placeholder">
+      <slot name="auth" />
+    </HeaderPlaceholder>
   </header>
 </template>
 

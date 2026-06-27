@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BoxBottom.Aspire.Orchestration\BoxBottom.Aspire.Orchestration.csproj" />
+    <ProjectReference Include="..\BoxBottom.Auth.Emulation\BoxBottom.Auth.Emulation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="keycloak\box-realm.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

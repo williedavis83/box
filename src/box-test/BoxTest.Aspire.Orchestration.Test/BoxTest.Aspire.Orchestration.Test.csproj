@@ -21,12 +21,22 @@
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Aspire.Orchestration\BoxBottom.Aspire.Orchestration.csproj" />
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Azure.Table\BoxBottom.Azure.Table.csproj" />
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Emulation\BoxBottom.Emulation.csproj" />
-    <ProjectReference Include="..\..\box-content\AzureTable.Emulator\AzureTable.Emulator.csproj" />
-    <ProjectReference Include="..\..\box-content\AzureTable.Aspire\AzureTable.Aspire.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.AzureTable.Emulation\BoxBottom.AzureTable.Emulation.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.AzureTable.Aspire\BoxBottom.AzureTable.Aspire.csproj" />
     <ProjectReference Include="..\..\box-content\Bleeb.Aspire\Bleeb.Aspire.csproj" />
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Aspire.ServiceDefaults\BoxBottom.Aspire.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\box-content\Blabber.Emulator\Blabber.Emulator.csproj" />
     <ProjectReference Include="..\..\box-content\Foo.Primary.Api\Foo.Primary.Api.csproj" />
+    <ProjectReference Include="..\..\box-pack\BoxPack.Auth.Customization\BoxPack.Auth.Customization.csproj" />
+    <ProjectReference Include="..\..\box-pack\BoxPack.Aspire.Orchestration\BoxPack.Aspire.Orchestration.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Emulation\BoxBottom.Auth.Emulation.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Aspire\BoxBottom.Auth.Aspire.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Business\BoxBottom.Auth.Business.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Contract\BoxBottom.Auth.Contract.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Entra\BoxBottom.Auth.Entra.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.ZeroAuth\BoxBottom.Auth.ZeroAuth.csproj" />
+    <ProjectReference Include="..\..\box-pack\BoxPack.Users.Customization\BoxPack.Users.Customization.csproj" />
+    <ProjectReference Include="..\..\box-top\BoxTop.Users.Api\BoxTop.Users.Api.csproj" />
     <ProjectReference Include="..\..\box-content\Foo.Primary.Shared\Foo.Primary.Shared.csproj" />
     <ProjectReference Include="..\..\box-content\Bleeb.Emulator.Api\Bleeb.Emulator.Api.csproj" />
   </ItemGroup>

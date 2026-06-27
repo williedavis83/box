@@ -24,6 +24,10 @@ export default defineConfig({
         repoSrc,
         'box-pack/BoxPack.Web.Basics/src/index.js',
       ),
+      '@box-pack/users-web': path.resolve(
+        repoSrc,
+        'box-pack/BoxPack.Users.Web/src/index.js',
+      ),
     },
   },
   server: {

@@ -43,6 +43,22 @@ internal sealed class AzureTableService(IAzureTableServiceClientFactory clientFa
         string rowKey,
         CancellationToken cancellationToken = default)
     {
+        var entity = await GetEntityAsync<TableEntity>(
+            tableName,
+            partitionKey,
+            rowKey,
+            cancellationToken);
+
+        return entity is null ? null : ToResult(entity);
+    }
+
+    public async Task<TEntity?> GetEntityAsync<TEntity>(
+        string tableName,
+        string partitionKey,
+        string rowKey,
+        CancellationToken cancellationToken = default)
+        where TEntity : class, ITableEntity, new()
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(tableName);
         ArgumentException.ThrowIfNullOrWhiteSpace(partitionKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(rowKey);
@@ -52,12 +68,12 @@ internal sealed class AzureTableService(IAzureTableServiceClientFactory clientFa
 
         try
         {
-            var response = await tableClient.GetEntityAsync<TableEntity>(
+            var response = await tableClient.GetEntityAsync<TEntity>(
                 partitionKey,
                 rowKey,
                 cancellationToken: cancellationToken);
 
-            return ToResult(response.Value);
+            return response.Value;
         }
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
@@ -99,16 +115,29 @@ internal sealed class AzureTableService(IAzureTableServiceClientFactory clientFa
         ArgumentException.ThrowIfNullOrWhiteSpace(entity.PartitionKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(entity.RowKey);
 
-        var client = _clientFactory.CreateClient();
-        var tableClient = client.GetTableClient(tableName);
-
         var tableEntity = new TableEntity(entity.PartitionKey, entity.RowKey);
         foreach (var (key, value) in entity.Properties)
         {
             tableEntity[key] = value;
         }
 
-        await tableClient.UpsertEntityAsync(tableEntity, cancellationToken: cancellationToken);
+        await UpsertEntityAsync(tableName, tableEntity, cancellationToken);
+    }
+
+    public async Task UpsertEntityAsync<TEntity>(
+        string tableName,
+        TEntity entity,
+        CancellationToken cancellationToken = default)
+        where TEntity : ITableEntity
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tableName);
+        ArgumentNullException.ThrowIfNull(entity);
+        ArgumentException.ThrowIfNullOrWhiteSpace(entity.PartitionKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(entity.RowKey);
+
+        var client = _clientFactory.CreateClient();
+        var tableClient = client.GetTableClient(tableName);
+        await tableClient.UpsertEntityAsync(entity, cancellationToken: cancellationToken);
     }
 
     private static AzureTableEntityResult ToResult(TableEntity entity)

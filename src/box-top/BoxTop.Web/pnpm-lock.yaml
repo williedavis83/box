@@ -11,6 +11,9 @@ importers:
       '@box-bottom/web-components':
         specifier: file:../../box-bottom/BoxBottom.Web.Components
         version: file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)
+      '@box-pack/users-web':
+        specifier: file:../../box-pack/BoxPack.Users.Web
+        version: file:../../box-pack/BoxPack.Users.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)
       '@box-pack/web-basics':
         specifier: file:../../box-pack/BoxPack.Web.Basics
         version: file:../../box-pack/BoxPack.Web.Basics
@@ -84,6 +87,13 @@ packages:
       vue: ^3.5.0
       vue-router: ^5.0.0
 
+  '@box-pack/users-web@file:../../box-pack/BoxPack.Users.Web':
+    resolution: {directory: ../../box-pack/BoxPack.Users.Web, type: directory}
+    peerDependencies:
+      '@box-bottom/web-components': ^0.0.0
+      vue: ^3.5.0
+      vue-router: ^5.0.0
+
   '@box-pack/web-basics@file:../../box-pack/BoxPack.Web.Basics':
     resolution: {directory: ../../box-pack/BoxPack.Web.Basics, type: directory}
 
@@ -100,6 +110,12 @@ packages:
 
   '@emnapi/wasi-threads@1.2.1':
     resolution: {integrity: sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w==}
+
+  '@foo/azure-table-web@file:../../box-content/Foo.AzureTable.Web':
+    resolution: {directory: ../../box-content/Foo.AzureTable.Web, type: directory}
+    peerDependencies:
+      '@box-bottom/web-components': ^0.0.0
+      vue: ^3.5.0
 
   '@foo/blabber-web@file:../../box-content/Foo.Blabber.Web':
     resolution: {directory: ../../box-content/Foo.Blabber.Web, type: directory}
@@ -654,11 +670,19 @@ snapshots:
       vue: 3.5.35
       vue-router: 5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35)
 
+  '@box-pack/users-web@file:../../box-pack/BoxPack.Users.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)':
+    dependencies:
+      '@box-bottom/web-components': file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)
+      vue: 3.5.35
+      vue-router: 5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35)
+
   '@box-pack/web-basics@file:../../box-pack/BoxPack.Web.Basics': {}
 
   '@box-pack/web-navigation@file:../../box-pack/BoxPack.Web.Navigation(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)':
     dependencies:
       '@box-bottom/web-emulation': file:../../box-bottom/BoxBottom.Web.Emulation(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)
+      '@box-pack/users-web': file:../../box-pack/BoxPack.Users.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)
+      '@foo/azure-table-web': file:../../box-content/Foo.AzureTable.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue@3.5.35)
       '@foo/blabber-web': file:../../box-content/Foo.Blabber.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue@3.5.35)
       '@foo/web-hello': file:../../box-content/Foo.Web.Hello(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue@3.5.35)
       '@foo/web-test': file:../../box-content/Foo.Web.Test(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)
@@ -682,6 +706,11 @@ snapshots:
     dependencies:
       tslib: 2.8.1
     optional: true
+
+  '@foo/azure-table-web@file:../../box-content/Foo.AzureTable.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue@3.5.35)':
+    dependencies:
+      '@box-bottom/web-components': file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35)
+      vue: 3.5.35
 
   '@foo/blabber-web@file:../../box-content/Foo.Blabber.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@8.0.16(yaml@2.9.0))(vue@3.5.35))(vue@3.5.35))(vue@3.5.35)':
     dependencies:

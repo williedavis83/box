@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@box-bottom/web-components": "file:../../box-bottom/BoxBottom.Web.Components",
+    "@box-pack/users-web": "file:../../box-pack/BoxPack.Users.Web",
     "@box-pack/web-basics": "file:../../box-pack/BoxPack.Web.Basics",
     "@box-pack/web-navigation": "file:../../box-pack/BoxPack.Web.Navigation",
     "vue": "^3.5.35",

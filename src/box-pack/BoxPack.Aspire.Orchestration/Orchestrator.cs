@@ -1,8 +1,11 @@
-using AzureTable.Aspire;
-using AzureTable.Emulator;
+using BoxBottom.Aspire.Orchestration;
+using BoxBottom.Auth.Aspire;
+using BoxBottom.Auth.ZeroAuth;
+using BoxBottom.AzureTable.Aspire;
+using BoxBottom.AzureTable.Emulation;
 using Bleeb.Aspire;
 using Blabber.Emulator;
-using BoxBottom.Aspire.Orchestration;
+using BoxBottom.Users.Contract;
 using Foo.Primary.Shared.AzureTable;
 using Foo.Primary.Shared.Blabber;
 
@@ -13,6 +16,7 @@ public static class Orchestrator
     private const string BoxStackName = "box";
     private const string BobStackName = "bob";
     private const string WorldMessageEnvironmentVariable = "World__Message";
+    private const string AuthProviderEnvironmentVariable = "Auth__Provider";
 
     public static IReadOnlyDictionary<string, StackResources> Orchestrate(StackOperations stackOperations)
     {
@@ -30,8 +34,16 @@ public static class Orchestrator
             projectPath: @"..\..\box-content\Foo.Secondary.Api\Foo.Secondary.Api.csproj",
             grpcOnlyAppChannel: true));
 
+        boxStack.AddApi(new ApiProjectOptions(
+            logicalName: "users-api",
+            projectPath: @"..\..\box-top\BoxTop.Users.Api\BoxTop.Users.Api.csproj"));
+
+        boxStack["users-api"].WithEntraEmulation(stackOperations);
+
         var bobStack = boxStack with { Name = BobStackName };
         bobStack["secondary-api"].EnvironmentVariables[WorldMessageEnvironmentVariable] = "Bob";
+        bobStack["users-api"].EnvironmentVariables[AuthProviderEnvironmentVariable] =
+            ZeroAuthAuthProvider.Name;
 
         var bobBlabberEmulation = new BlabberEmulationConfigurationBuilder()
             .OverrideSingleton(BlabberKeys.Foo, "foo")
@@ -67,6 +79,10 @@ public static class Orchestrator
                     (AzureTableGeoKeys.UsEast, AzureTableKeys.GeoUsEast),
                     (AzureTableGeoKeys.EuWest, AzureTableKeys.GeoEuWest)));
 
+        bobStack["users-api"].WithAzureTableEmulation(
+            stackOperations,
+            builder => builder.OverrideSingleton(UserTableKeys.Users));
+
         var stacks = new Dictionary<string, StackResources>(StringComparer.OrdinalIgnoreCase)
         {
             [BoxStackName] = stackOperations.OrchestrateStack(boxStack),
@@ -84,11 +100,14 @@ public static class Orchestrator
             BleebEmulatorOrchestrationConfiguration.EmulatorBaseUriEnvironmentVariable,
             BobStackName);
 
-        AzuriteOrchestrator.WireToPrimaryApis(
+        AzuriteOrchestrator.WireToApis(
             stackOperations,
             stacks,
+            [BobStackName],
             BleebOrchestrationConfiguration.PrimaryApiLogicalName,
-            BobStackName);
+            "users-api");
+
+        KeycloakOrchestrator.WireEntraEmulationToUsersApi(stackOperations, stacks, BoxStackName);
 
         return stacks;
     }

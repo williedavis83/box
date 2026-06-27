@@ -1,4 +1,4 @@
-using AzureTable.Emulator;
+using BoxBottom.AzureTable.Emulation;
 using BoxBottom.Azure.Table;
 using BoxBottom.Emulation;
 using Foo.Primary.Api.AzureTable;

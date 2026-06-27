@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Azure.Table\BoxBottom.Azure.Table.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Emulation\BoxBottom.Emulation.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Users.Business\BoxBottom.Users.Business.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Users.Contract\BoxBottom.Users.Contract.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Users.Controllers\BoxBottom.Users.Controllers.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Users.Data\BoxBottom.Users.Data.csproj" />
+  </ItemGroup>
+
+</Project>

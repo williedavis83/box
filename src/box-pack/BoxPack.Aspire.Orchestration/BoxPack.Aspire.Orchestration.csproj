@@ -8,8 +8,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Aspire.Orchestration\BoxBottom.Aspire.Orchestration.csproj" />
-    <ProjectReference Include="..\..\box-content\AzureTable.Aspire\AzureTable.Aspire.csproj" />
-    <ProjectReference Include="..\..\box-content\AzureTable.Emulator\AzureTable.Emulator.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Users.Contract\BoxBottom.Users.Contract.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Contract\BoxBottom.Auth.Contract.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Emulation\BoxBottom.Auth.Emulation.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.Aspire\BoxBottom.Auth.Aspire.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.Auth.ZeroAuth\BoxBottom.Auth.ZeroAuth.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.AzureTable.Aspire\BoxBottom.AzureTable.Aspire.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.AzureTable.Emulation\BoxBottom.AzureTable.Emulation.csproj" />
     <ProjectReference Include="..\..\box-content\Bleeb.Aspire\Bleeb.Aspire.csproj" />
     <ProjectReference Include="..\..\box-content\Blabber.Emulator\Blabber.Emulator.csproj" />
     <ProjectReference Include="..\..\box-content\Foo.Primary.Shared\Foo.Primary.Shared.csproj" />

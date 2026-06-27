@@ -1,12 +1,25 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/box-bottom/">
+    <Project Path="src/box-bottom/BoxBottom.Auth.Aspire/BoxBottom.Auth.Aspire.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Auth.Emulation/BoxBottom.Auth.Emulation.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Auth.Business/BoxBottom.Auth.Business.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Auth.Contract/BoxBottom.Auth.Contract.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Auth.Controllers/BoxBottom.Auth.Controllers.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Auth.Entra/BoxBottom.Auth.Entra.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Auth.ZeroAuth/BoxBottom.Auth.ZeroAuth.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Aspire.Orchestration/BoxBottom.Aspire.Orchestration.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Aspire.ServiceDefaults/BoxBottom.Aspire.ServiceDefaults.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Azure.Table/BoxBottom.Azure.Table.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.AzureTable.Aspire/BoxBottom.AzureTable.Aspire.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.AzureTable.Emulation/BoxBottom.AzureTable.Emulation.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Dapr/BoxBottom.Dapr.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Emulation/BoxBottom.Emulation.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Emulation.Shared/BoxBottom.Emulation.Shared.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Users.Business/BoxBottom.Users.Business.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Users.Contract/BoxBottom.Users.Contract.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Users.Controllers/BoxBottom.Users.Controllers.csproj" />
+    <Project Path="src/box-bottom/BoxBottom.Users.Data/BoxBottom.Users.Data.csproj" />
     <Project Path="src/box-bottom/BoxBottom.Web.Components/BoxBottom.Web.Components.esproj">
       <Build />
       <Deploy />
@@ -17,7 +30,13 @@
     </Project>
   </Folder>
   <Folder Name="/src/box-pack/">
+    <Project Path="src/box-pack/BoxPack.Auth.Customization/BoxPack.Auth.Customization.csproj" />
     <Project Path="src/box-pack/BoxPack.Aspire.Orchestration/BoxPack.Aspire.Orchestration.csproj" />
+    <Project Path="src/box-pack/BoxPack.Users.Customization/BoxPack.Users.Customization.csproj" />
+    <Project Path="src/box-pack/BoxPack.Users.Web/BoxPack.Users.Web.esproj">
+      <Build />
+      <Deploy />
+    </Project>
     <Project Path="src/box-pack/BoxPack.Web.Basics/BoxPack.Web.Basics.esproj">
       <Build />
       <Deploy />
@@ -28,8 +47,6 @@
     </Project>
   </Folder>
   <Folder Name="/src/box-content/">
-    <Project Path="src/box-content/AzureTable.Aspire/AzureTable.Aspire.csproj" />
-    <Project Path="src/box-content/AzureTable.Emulator/AzureTable.Emulator.csproj" />
     <Project Path="src/box-content/Bleeb.Aspire/Bleeb.Aspire.csproj" />
     <Project Path="src/box-content/Bleeb.Api/Bleeb.Api.csproj" />
     <Project Path="src/box-content/Bleeb.Emulator.Api/Bleeb.Emulator.Api.csproj" />
@@ -63,6 +80,7 @@
     <Project Path="src/box-top/BoxTop.Aspire/BoxTop.Aspire.csproj" />
     <Project Path="src/box-top/BoxTop.Edge/BoxTop.Edge.csproj" />
     <Project Path="src/box-top/BoxTop.Meta.Api/BoxTop.Meta.Api.csproj" />
+    <Project Path="src/box-top/BoxTop.Users.Api/BoxTop.Users.Api.csproj" />
     <Project Path="src/box-top/BoxTop.Web/BoxTop.Web.esproj">
       <Build />
       <Deploy />

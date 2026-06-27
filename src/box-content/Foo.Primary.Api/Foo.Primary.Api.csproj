@@ -12,7 +12,7 @@
     <ProjectReference Include="..\..\box-bottom\BoxBottom.Emulation\BoxBottom.Emulation.csproj" />
     <ProjectReference Include="..\Foo.Primary.Shared\Foo.Primary.Shared.csproj" />
     <ProjectReference Include="..\Blabber.Emulator\Blabber.Emulator.csproj" />
-    <ProjectReference Include="..\AzureTable.Emulator\AzureTable.Emulator.csproj" />
+    <ProjectReference Include="..\..\box-bottom\BoxBottom.AzureTable.Emulation\BoxBottom.AzureTable.Emulation.csproj" />
     <ProjectReference Include="..\Blabber.Lib\Blabber.Lib.csproj" />
   </ItemGroup>
 

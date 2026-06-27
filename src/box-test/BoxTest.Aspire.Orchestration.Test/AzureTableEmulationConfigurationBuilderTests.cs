@@ -1,4 +1,4 @@
-using AzureTable.Emulator;
+using BoxBottom.AzureTable.Emulation;
 using Foo.Primary.Shared.AzureTable;
 using Xunit;
 
