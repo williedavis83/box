@@ -35,10 +35,11 @@ Match box edge routing (browser hits edge/web proxy path, not internal API path)
 
 | Environment | PublicOrigin | Redirect URI |
 |-------------|--------------|--------------|
-| Local Vite (real Entra dev test) | `http://localhost:{port}` | `http://localhost:{port}/api/users/signin-oidc` |
+| Local Aspire (`boe`) | `http://localhost:{ephemeral}` | `http://localhost/api/users/signin-oidc` |
 | Proof/staging host | `https://{host}` | `https://{host}/api/users/signin-oidc` |
 
-Add **both** if testing locally against real Entra without Keycloak.
+Entra allows **any port** on an `http://localhost` loopback redirect, so the single
+port-less entry that Terraform registers (`variables.tf`) covers every local Aspire run.
 
 Internal API callback path (after YARP strip) remains `/api/signin-oidc` — configured in `Auth:Entra:CallbackPath`, not sent to Entra as redirect URI.
 
@@ -100,21 +101,27 @@ If using policy-specific URLs (`p=B2C_1_signupsignin`), ASP.NET Core may need:
 }
 ```
 
-Evaluate during implementation whether External ID requires `Policy` on OIDC options (`options.ResponseMode`, custom `OnRedirectToIdentityProvider` to append `p=`). Many CIAM tenants work with the unified v2.0 authority once the app is linked to the default user flow — **verify with a live authorize URL**.
+**Resolved:** the unified v2.0 authority works once the app is linked to the default user
+flow; no `p=`/`PolicyId` is required. The one OIDC option that had to change is
+`options.ResponseMode = OpenIdConnectResponseMode.Query` (see
+[box-application-wiring.md](./box-application-wiring.md#response-mode-correlation)) — the
+`form_post` default drops the `SameSite=Lax` correlation cookie against the cross-site CIAM
+origin.
 
-## Disable Keycloak for real Entra proof
+## Real Entra vs. Keycloak (handled by the `boe` stack)
 
-In Aspire / deployment for proof environment:
-
-- Do **not** call `KeycloakOrchestrator.WireEntraEmulationToUsersApi` for the target stack, **or**
-- Override env vars after wiring:
+This is automatic. The `boe` stack never wires Keycloak: `EntraProofOrchestrator` sets the
+provider/tenant/callback paths, and the authority, client id, and client secret load from
+Key Vault. See [box-application-wiring.md](./box-application-wiring.md). The effective
+`users-api` configuration is:
 
 ```text
-Auth__Entra__Authority=https://rdbox.ciamlogin.com/9af8af7b-10ee-4bd5-b71c-20daa8e37878/v2.0
+Auth__Provider=Entra
+Auth__Entra__Authority=<Key Vault: auth-entra-authority>
 Auth__Entra__TenantId=9af8af7b-10ee-4bd5-b71c-20daa8e37878
-Auth__Entra__ClientId=<from app registration>
-Auth__Entra__ClientSecret=<from Key Vault>
-Auth__Entra__PublicOrigin=<browser web origin>
+Auth__Entra__ClientId=<Key Vault: auth-entra-client-id>
+Auth__Entra__ClientSecret=<Key Vault: auth-entra-client-secret>
+Auth__Entra__PublicOrigin=<boe web origin, wired post-orchestrate>
 ```
 
 ## Manual test script

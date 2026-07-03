@@ -25,10 +25,10 @@ Keycloak emulation remains valid for **local Aspire**; this proof uses **real Az
 
 ### Infrastructure
 
-- [ ] Terraform applies cleanly to RD-Box subscription (idempotent second apply).
-- [ ] Key Vault exists; client secret stored; no secret committed to git.
-- [ ] App registration exists with correct redirect URIs for the proof environment.
-- [ ] External ID **user flow** allows sign-up/sign-in with email (local account).
+- [x] Terraform applies cleanly to RD-Box subscription (idempotent second apply).
+- [x] Key Vault exists; client secret stored; no secret committed to git.
+- [x] App registration + enterprise app exist with correct redirect URIs (v2 access tokens).
+- [x] External ID **user flow** allows sign-up/sign-in with email (local account).
 
 ### Application
 
@@ -37,11 +37,11 @@ Keycloak emulation remains valid for **local Aspire**; this proof uses **real Az
 - [x] `Auth__Entra__PublicOrigin` matches the browser-facing web URL (`EntraProofOrchestrator.WireRealEntraToUsersApi`).
 - [x] `Auth__Entra__ExternalCallbackPath=/api/users/signin-oidc` (edge path; unchanged from local).
 - [x] Keycloak env overrides **not** applied to **boe** (only **box** uses Keycloak).
-- [ ] Correlation cookie / callback origin behavior verified manually against real Entra.
+- [x] Correlation cookie / callback origin verified against real Entra (fixed via `response_mode=query`).
 
 ### Functional
 
-- [ ] Manual login: new External ID user → profile created → `/api/UserProfile/me` returns data.
+- [x] Manual login: new External ID user → profile created → `/api/UserProfile/me` returns data.
 - [ ] Repeat login: same `externalId` maps to same internal `userId`.
 - [ ] Logout clears session; protected endpoints return 401.
 - [x] **boe** stack **rejects** ZeroAuth when Entra is configured (`auth-api.spec.js`).
@@ -74,4 +74,6 @@ Keycloak emulation remains valid for **local Aspire**; this proof uses **real Az
 
 ## Success statement
 
-> A developer can run `terraform apply`, start Aspire with `BOX_ENTRA_PROOF=1`, sign in through **Entra External ID** on the **boe** stack, and use the web app authenticated — with Playwright verifying the flow.
+> After `terraform apply` and `az login`, a developer starts Aspire, signs in through
+> **Entra External ID** on the **boe** stack, and uses the web app authenticated — with
+> Playwright verifying the flow. No per-run environment variables are required.

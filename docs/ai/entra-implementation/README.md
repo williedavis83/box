@@ -1,108 +1,60 @@
-# Entra implementation — proof plan for box-chassis
+# Entra External ID — reference implementation
 
+This folder documents how box-chassis authenticates against **real Microsoft Entra
+External ID** (the `boe` stack), using the **RD-Box** Azure subscription. It doubles as a
+worked example of taking an emulated capability (Keycloak) to a real cloud dependency
+managed by **Terraform** with secrets in **Key Vault**.
 
+The near-term target is email/password sign-in in a CIAM tenant; the long-term target is
+customer-facing sign-in with social identity providers (see
+[social-login-roadmap.md](./social-login-roadmap.md)).
 
-This folder documents what is required to **prove real Microsoft Entra works** in box-chassis (not Keycloak emulation), using the **RD-Box** Azure subscription. The long-term target is **customer-facing sign-in with social identity providers**; the near-term target is a minimal, repeatable Azure footprint managed by **Terraform** with secrets in **Key Vault**.
-
-
-
-## Implementation status
-
-
+## What is implemented
 
 | Component | Location |
-
 |-----------|----------|
-
-| Terraform (KV + app reg) | [`infra/entra-proof/`](../../../infra/entra-proof/) |
-
+| Terraform (Key Vault + app registration) | [`infra/entra-proof/`](../../../infra/entra-proof/) |
 | Portal runbook | [`infra/entra-proof/README.md`](../../../infra/entra-proof/README.md) |
-
-| **boe** Aspire stack (real Entra) | [`Orchestrator.cs`](../../../src/box-pack/BoxPack.Aspire.Orchestration/Orchestrator.cs), [`EntraProofOrchestrator.cs`](../../../src/box-bottom/BoxBottom.Auth.Aspire/EntraProofOrchestrator.cs) |
-
-| Key Vault config in users-api | [`BoxTop.Users.Api/Program.cs`](../../../src/box-top/BoxTop.Users.Api/Program.cs) |
-
+| `boe` Aspire stack | [`Orchestrator.cs`](../../../src/box-pack/BoxPack.Aspire.Orchestration/Orchestrator.cs), [`EntraProofOrchestrator.cs`](../../../src/box-bottom/BoxBottom.Auth.Aspire/EntraProofOrchestrator.cs) |
+| Key Vault config provider | [`KeyVaultConfigurationExtensions.cs`](../../../src/box-top/BoxTop.Users.Api/KeyVaultConfigurationExtensions.cs), [`BoxKeyVaultSecretManager.cs`](../../../src/box-top/BoxTop.Users.Api/Configuration/BoxKeyVaultSecretManager.cs) |
+| OIDC + cookie auth | [`EntraAuthServiceCollectionExtensions.cs`](../../../src/box-bottom/BoxBottom.Auth.Entra/EntraAuthServiceCollectionExtensions.cs) |
+| Claims → user | [`EntraClaimsMapper.cs`](../../../src/box-bottom/BoxBottom.Auth.Entra/EntraClaimsMapper.cs) |
 | Playwright proof | [`auth-entra-ui.spec.js`](../../../src/box-test/BoxTest.Playwright/tests/auth-entra-ui.spec.js) |
-
 | CI | [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml) |
 
+## Running the `boe` stack
 
-
-Enable the **boe** stack:
-
-
+No per-run environment variables are needed. The Key Vault URI lives in
+`BoxTop.Users.Api/appsettings.Development.json`, and the client id, client secret, and
+authority are read from Key Vault secrets at runtime. You only need to be signed in to
+Azure so `DefaultAzureCredential` can read the vault:
 
 ```powershell
-
-$env:BOX_ENTRA_PROOF = "1"
-
-$env:Auth__Entra__ClientId = "<terraform output entra_client_id>"
-
-$env:KeyVault__VaultUri = "<terraform output key_vault_uri>"
-
+az login
 dotnet run --project src/box-top/BoxTop.Aspire
-
 ```
 
-
-
-## Documents
-
-
-
-| Doc | Purpose |
-
-|-----|---------|
-
-| [azure-subscription-inventory.md](./azure-subscription-inventory.md) | What exists in Azure today (PowerShell/`az` interrogation, 2026-07-01) |
-
-| [proof-criteria.md](./proof-criteria.md) | Definition of done for “Entra actually works” |
-
-| [terraform.md](./terraform.md) | Infrastructure to provision with Terraform |
-
-| [keyvault.md](./keyvault.md) | Secret naming, access model, and runtime binding |
-
-| [entra-external-id-setup.md](./entra-external-id-setup.md) | App registration, authority URLs, redirect URIs, user flows |
-
-| [box-application-wiring.md](./box-application-wiring.md) | Mapping Azure resources → `Auth:Entra` configuration in box |
-
-| [social-login-roadmap.md](./social-login-roadmap.md) | Path from workforce/CIAM email login → full social IdPs |
-
-
+The `box` (Keycloak) and `bob` (ZeroAuth) stacks disable Key Vault and require no Azure
+credentials. See [box-application-wiring.md](./box-application-wiring.md) for the full
+configuration flow, and [`infra/entra-proof/README.md`](../../../infra/entra-proof/README.md)
+for `terraform apply` and the External ID portal steps.
 
 ## Stack layout
 
-
-
 | Stack | Auth | Notes |
-
 |-------|------|-------|
+| `box` | Keycloak emulation | Default local dev; no Azure needed |
+| `bob` | ZeroAuth | Dev JSON login; no Azure needed |
+| `boe` | Real Entra External ID | Reads Key Vault; requires `az login` |
 
-| **box** | Keycloak emulation | Default local dev |
+## Documents
 
-| **bob** | ZeroAuth | Dev JSON login |
-
-| **boe** | Real Entra External ID | Gated by `BOX_ENTRA_PROOF=1` |
-
-
-
-## Related code
-
-
-
-| Area | Location |
-
-|------|----------|
-
-| OIDC + cookie auth | `src/box-bottom/BoxBottom.Auth.Entra/` |
-
-| Entra options | `src/box-bottom/BoxBottom.Auth.Contract/EntraAuthOptions.cs` |
-
-| Keycloak emulation (box) | `src/box-bottom/BoxBottom.Auth.Aspire/KeycloakOrchestrator.cs` |
-
-| Real Entra proof (boe) | `src/box-bottom/BoxBottom.Auth.Aspire/EntraProofOrchestrator.cs` |
-
-| Default CIAM config | `src/box-top/BoxTop.Users.Api/appsettings.json` |
-
-| Claims → external user | `src/box-bottom/BoxBottom.Auth.Entra/EntraClaimsMapper.cs` |
-
+| Doc | Purpose |
+|-----|---------|
+| [azure-subscription-inventory.md](./azure-subscription-inventory.md) | What exists in the RD-Box subscription (`az` interrogation, 2026-07-01) |
+| [proof-criteria.md](./proof-criteria.md) | Definition of done for "Entra actually works" |
+| [terraform.md](./terraform.md) | Infrastructure provisioned with Terraform |
+| [keyvault.md](./keyvault.md) | Secret naming, access model, and runtime binding |
+| [entra-external-id-setup.md](./entra-external-id-setup.md) | App registration, authority URLs, redirect URIs, user flows |
+| [box-application-wiring.md](./box-application-wiring.md) | How Azure resources map to `Auth:Entra` config in box |
+| [social-login-roadmap.md](./social-login-roadmap.md) | Path from email login to full social IdPs |

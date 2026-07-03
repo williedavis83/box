@@ -76,15 +76,16 @@ api {
 
 **Note:** User flows and social IdPs are often configured in the **External ID portal** or via Graph API. Terraform covers the **application object**; document manual portal steps in [entra-external-id-setup.md](./entra-external-id-setup.md) until Graph automation is justified.
 
-Example redirect URI variables:
+Redirect URI variable (see `variables.tf`). Aspire assigns the web app an ephemeral port,
+so the registered loopback URI is **port-less** — Entra External ID allows any port on a
+`http://localhost` loopback redirect, so a single entry covers every local run:
 
 ```hcl
 variable "oidc_redirect_uris" {
   type = list(string)
   default = [
-    "https://localhost:5173/api/users/signin-oidc",   # local HTTPS if used
-    "http://localhost:5173/api/users/signin-oidc",    # vite dev (proof only)
-    # add deployed staging URL when host exists:
+    "http://localhost/api/users/signin-oidc",   # loopback: any port matches
+    # add a deployed staging URL when a stable host exists:
     # "https://box-proof.example.com/api/users/signin-oidc",
   ]
 }
@@ -114,22 +115,25 @@ If using Container Apps, register `Microsoft.App` provider first (currently **No
 | `resource_group_name` | `rdbox-rg` | Existing |
 | `key_vault_name` | `rdbox-kv` | Globally unique |
 | `entra_app_display_name` | `box-web` | |
-| `entra_authority` | `https://rdbox.ciamlogin.com/9af8af7b-10ee-4bd5-b71c-20daa8e37878/v2.0` | Output for app config |
-| `public_web_origin` | `https://...` | Browser origin for OIDC |
+| `entra_authority` | `https://rdbox.ciamlogin.com/9af8af7b-10ee-4bd5-b71c-20daa8e37878/v2.0` | Stored as `auth-entra-authority` secret |
 | `oidc_redirect_uris` | list | Must include `{origin}/api/users/signin-oidc` |
+| `deployer_object_id` | GUID | Object ID granted Key Vault Secrets Officer for `apply` |
 
-## Outputs (for box deployment)
+## Outputs (see `outputs.tf`)
 
 ```hcl
-output "entra_authority" { ... }
-output "entra_tenant_id" { value = var.tenant_id }
 output "entra_client_id" { value = azuread_application.box_web.client_id }
-output "key_vault_uri" { value = azurerm_key_vault.box.vault_uri }
+output "entra_authority" { value = var.entra_authority }
+output "entra_tenant_id" { value = var.tenant_id }
+output "key_vault_uri"   { value = azurerm_key_vault.box.vault_uri }
+output "key_vault_name"  { value = azurerm_key_vault.box.name }
 output "key_vault_secret_name_client_secret" { value = "auth-entra-client-secret" }
-output "public_web_origin" { ... }
+output "key_vault_secret_name_client_id"     { value = "auth-entra-client-id" }
+output "oidc_redirect_uris" { value = var.oidc_redirect_uris }
 ```
 
-Runtime reads secret from Key Vault; Terraform output never prints secret value.
+At runtime the app reads the client id, secret, and authority from Key Vault; the client
+secret value is never printed by a Terraform output.
 
 ## Provider authentication
 

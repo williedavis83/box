@@ -2,9 +2,12 @@
 
 ## Current state
 
-- **No Key Vault** in RD-Box subscription (verified 2026-07-01).
+- Key Vault **`rdbox-kv`** exists in `rdbox-rg` (created by Terraform, RBAC-authorized).
 - `Microsoft.KeyVault` resource provider is **Registered**.
-- `users-api` today reads Entra settings from **environment variables** / `appsettings.json` (Keycloak overrides in local Aspire).
+- `users-api` loads Entra secrets from Key Vault when `KeyVault:VaultUri` is set
+  ([`KeyVaultConfigurationExtensions`](../../../src/box-top/BoxTop.Users.Api/KeyVaultConfigurationExtensions.cs)).
+  The `boe` stack sets the URI (in `appsettings.Development.json`); `box`/`bob` set it empty
+  and never touch Azure.
 
 ## Recommended vault
 
@@ -22,9 +25,12 @@
 
 | Secret name | Source | Consumed as |
 |-------------|--------|-------------|
-| `auth-entra-client-secret` | Terraform `azuread_application_password` | `Auth__Entra__ClientSecret` |
-| `auth-entra-client-id` | Terraform output (optional; can be non-secret env) | `Auth__Entra__ClientId` |
-| `auth-entra-authority` | Terraform variable / output | `Auth__Entra__Authority` |
+| `auth-entra-client-secret` | Terraform `azuread_application_password` | `Auth:Entra:ClientSecret` |
+| `auth-entra-client-id` | Terraform (`azuread_application.client_id`) | `Auth:Entra:ClientId` |
+| `auth-entra-authority` | Terraform variable | `Auth:Entra:Authority` |
+
+The `auth-entra-` prefix and the secret-name → config-key mapping are enforced by
+[`BoxKeyVaultSecretManager`](../../../src/box-top/BoxTop.Users.Api/Configuration/BoxKeyVaultSecretManager.cs).
 
 Non-secret config can stay in App Service settings or Aspire parameters:
 
@@ -75,38 +81,36 @@ Signed-in user currently has **Owner** on subscription — sufficient for bootst
 Auth__Entra__ClientSecret = @Microsoft.KeyVault(SecretUri=https://rdbox-kv.vault.azure.net/secrets/auth-entra-client-secret/)
 ```
 
-### Option B — `Azure.Extensions.AspNetCore.Configuration.Secrets`
+### Option B — `Azure.Extensions.AspNetCore.Configuration.Secrets` (implemented)
 
-In `BoxTop.Users.Api/Program.cs` (future change):
+`BoxTop.Users.Api` uses this. `AddBoxKeyVaultConfiguration` adds the vault as a
+configuration source only when `KeyVault:VaultUri` is non-empty, using
+`DefaultAzureCredential` and a custom secret manager:
 
 ```csharp
-if (!builder.Environment.IsDevelopment())
-{
-    var vaultUri = builder.Configuration["KeyVault:VaultUri"];
-    if (!string.IsNullOrEmpty(vaultUri))
-    {
-        builder.Configuration.AddAzureKeyVault(
-            new Uri(vaultUri),
-            new DefaultAzureCredential());
-    }
-}
+var vaultUri = builder.Configuration["KeyVault:VaultUri"];
+if (string.IsNullOrWhiteSpace(vaultUri)) { return builder; }
+builder.Configuration.AddAzureKeyVault(
+    new Uri(vaultUri),
+    new DefaultAzureCredential(),
+    new BoxKeyVaultSecretManager());
 ```
 
-Map vault secret names to configuration keys:
+`BoxKeyVaultSecretManager` only loads `auth-entra-*` secrets and maps them to config keys:
 
 | Vault secret | Configuration key |
 |--------------|-------------------|
 | `auth-entra-client-secret` | `Auth:Entra:ClientSecret` |
+| `auth-entra-client-id` | `Auth:Entra:ClientId` |
+| `auth-entra-authority` | `Auth:Entra:Authority` |
 
-Environment variable override remains `Auth__Entra__ClientSecret` (double underscore).
+Environment variable overrides still work via `Auth__Entra__*` (double underscore).
 
-### Option C — Aspire (local against real Entra)
+### Option C — local Aspire against real Entra (implemented as the `boe` stack)
 
-For developer testing against real Entra without Keycloak:
-
-- Add optional `WithAzureKeyVault` reference in orchestration, **or**
-- User secrets / `.env` locally (never commit)
-- Keep Keycloak as default local path
+`boe` runs locally against real Entra with no Keycloak and no committed secrets: it sets
+`KeyVault:VaultUri` (from `appsettings.Development.json`) and relies on `az login` for
+`DefaultAzureCredential`. `box`/`bob` set the URI empty to stay fully offline.
 
 ## Rotation
 

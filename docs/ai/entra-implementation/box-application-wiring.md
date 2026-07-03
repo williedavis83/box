@@ -81,39 +81,44 @@ External ID users from social IdPs still expose a stable **`oid`** in the tenant
 
 | Environment | Provider | Authority source | Secret source |
 |-------------|----------|------------------|---------------|
-| Local Aspire (default box) | Entra (emulated) | Keycloak container URL | Keycloak realm secret |
-| Local Aspire (**boe**, `BOX_ENTRA_PROOF=1`) | Entra | `ciamlogin.com` | Key Vault (`DefaultAzureCredential`) |
-| bob stack | ZeroAuth | N/A | N/A |
+| Local Aspire (`box`) | Entra (emulated) | Keycloak container URL | Keycloak realm secret |
+| Local Aspire (`boe`) | Entra | Key Vault / `ciamlogin.com` | Key Vault (`DefaultAzureCredential`) |
+| `bob` stack | ZeroAuth | N/A | N/A |
 
-## Orchestrator — **boe** stack (implemented)
+## Response mode (correlation)
 
-[`Orchestrator.cs`](../../../src/box-pack/BoxPack.Aspire.Orchestration/Orchestrator.cs) adds a third stack when `BOX_ENTRA_PROOF=1`:
+The OIDC handler uses **`response_mode=query`** (`EntraAuthServiceCollectionExtensions`).
+The ASP.NET Core default is `form_post`, which returns the code via a cross-site POST;
+that drops the `SameSite=Lax` correlation/nonce cookies against a cross-site IdP like
+`ciamlogin.com`, producing "Correlation failed". A top-level GET callback keeps the Lax
+cookies. Keycloak is same-site (`localhost`) so it tolerates either mode.
 
-- **box** — Keycloak emulation (unchanged)
-- **bob** — ZeroAuth (unchanged)
-- **boe** — real Entra External ID via [`EntraProofOrchestrator`](../../../src/box-bottom/BoxBottom.Auth.Aspire/EntraProofOrchestrator.cs)
+## Orchestrator — `boe` stack
 
-```powershell
-$env:BOX_ENTRA_PROOF = "1"
-$env:Auth__Entra__ClientId = "<terraform output entra_client_id>"
-$env:KeyVault__VaultUri = "<terraform output key_vault_uri>"
-dotnet run --project src/box-top/BoxTop.Aspire
-```
+[`Orchestrator.cs`](../../../src/box-pack/BoxPack.Aspire.Orchestration/Orchestrator.cs) declares three stacks:
 
-`boe` `users-api` receives:
+- `box` — Keycloak emulation
+- `bob` — ZeroAuth
+- `boe` — real Entra External ID via [`EntraProofOrchestrator`](../../../src/box-bottom/BoxBottom.Auth.Aspire/EntraProofOrchestrator.cs)
+
+Run it with `az login` + `dotnet run --project src/box-top/BoxTop.Aspire` — no per-run
+environment variables are required.
+
+`boe` `users-api` gets its identity from Key Vault, not env vars:
 
 ```text
-Auth__Provider=Entra
-Auth__Entra__Authority=https://rdbox.ciamlogin.com/9af8af7b-10ee-4bd5-b71c-20daa8e37878/v2.0
-Auth__Entra__TenantId=9af8af7b-10ee-4bd5-b71c-20daa8e37878
-Auth__Entra__ClientId=<from env>
-KeyVault__VaultUri=<from env>
-Auth__Entra__PublicOrigin=<boe web endpoint, wired post-orchestrate>
-Auth__Entra__CallbackPath=/api/signin-oidc
-Auth__Entra__ExternalCallbackPath=/api/users/signin-oidc
+Auth__Provider=Entra                     # from EntraProofOrchestrator
+Auth__Entra__TenantId=<CIAM tenant>      # from EntraProofOrchestrator (default)
+KeyVault__VaultUri=https://rdbox-kv...   # from appsettings.Development.json
+Auth__Entra__PublicOrigin=<boe web URL>  # wired post-orchestrate
+Auth__Entra__ClientId=<Key Vault: auth-entra-client-id>
+Auth__Entra__ClientSecret=<Key Vault: auth-entra-client-secret>
+Auth__Entra__Authority=<Key Vault: auth-entra-authority>
 ```
 
-Client secret loads from Key Vault secret `auth-entra-client-secret` via [`BoxKeyVaultSecretManager`](../../../src/box-top/BoxTop.Users.Api/Configuration/BoxKeyVaultSecretManager.cs).
+`box` and `bob` set `KeyVault__VaultUri=""` so they never load Key Vault. Secrets map to
+config keys via [`BoxKeyVaultSecretManager`](../../../src/box-top/BoxTop.Users.Api/Configuration/BoxKeyVaultSecretManager.cs)
+(`auth-entra-*` → `Auth:Entra:*`).
 
 ## Frontend
 
