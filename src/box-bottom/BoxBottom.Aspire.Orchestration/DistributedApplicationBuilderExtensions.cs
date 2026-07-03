@@ -7,10 +7,10 @@ namespace BoxBottom.Aspire.Orchestration;
 
 public static class DistributedApplicationBuilderExtensions
 {
-    private const string HostingStartupAssembliesKey = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
-    private const string StackNameEnvironmentVariable = "BOX_STACK_NAME";
-    private const string DaprComponentsPath = "../../dapr/components";
-    private const string DaprConfigPath = "../../dapr/config.yaml";
+    private const string _hostingStartupAssembliesKey = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
+    private const string _stackNameEnvironmentVariable = "BOX_STACK_NAME";
+    private const string _daprComponentsPath = "../../dapr/components";
+    private const string _daprConfigPath = "../../dapr/config.yaml";
 
     /// <summary>
     /// Adds a .NET API project and applies standard Aspire configuration, including Scalar dashboard links.
@@ -27,8 +27,8 @@ public static class DistributedApplicationBuilderExtensions
         var daprSidecarOptions = new DaprSidecarOptions
         {
             AppId = options.StackName,
-            Config = DaprConfigPath,
-            ResourcesPaths = [DaprComponentsPath],
+            Config = _daprConfigPath,
+            ResourcesPaths = [_daprComponentsPath],
             AppChannelAddress = options.GrpcOnlyAppChannel ? "127.0.0.1" : null,
             AppEndpoint = options.GrpcOnlyAppChannel ? "grpc" : null,
             AppProtocol = options.GrpcOnlyAppChannel ? "h2c" : null,
@@ -46,8 +46,8 @@ public static class DistributedApplicationBuilderExtensions
 
         api = api
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", options.AspNetEnvironment)
-            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix)
-            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
+            .WithEnvironment(_stackNameEnvironmentVariable, options.StackPrefix)
+            .WithEnvironment(_hostingStartupAssembliesKey, string.Empty);
 
         foreach (var (key, value) in options.EnvironmentVariables)
         {
@@ -78,7 +78,7 @@ public static class DistributedApplicationBuilderExtensions
         var web = builder.AddViteApp(options.StackName, options.ProjectPath)
             .WithPnpm()
             .WithExternalHttpEndpoints()
-            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix);
+            .WithEnvironment(_stackNameEnvironmentVariable, options.StackPrefix);
 
         foreach (var (key, value) in options.EnvironmentVariables)
         {
@@ -119,8 +119,8 @@ public static class DistributedApplicationBuilderExtensions
             .WithHttpHealthCheck("/health")
             .WithExternalHttpEndpoints()
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
-            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix)
-            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
+            .WithEnvironment(_stackNameEnvironmentVariable, options.StackPrefix)
+            .WithEnvironment(_hostingStartupAssembliesKey, string.Empty);
 
         foreach (var (key, value) in options.EnvironmentVariables)
         {
@@ -191,8 +191,8 @@ public static class DistributedApplicationBuilderExtensions
             .WithExternalHttpEndpoints()
             .WithUrlForEndpoint("http", url => url.Url = "/scalar")
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
-            .WithEnvironment(StackNameEnvironmentVariable, options.StackPrefix)
-            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
+            .WithEnvironment(_stackNameEnvironmentVariable, options.StackPrefix)
+            .WithEnvironment(_hostingStartupAssembliesKey, string.Empty);
 
         foreach (var (key, value) in options.EnvironmentVariables)
         {
@@ -266,7 +266,7 @@ public static class DistributedApplicationBuilderExtensions
             .WithHttpHealthCheck("/health")
             .WithExternalHttpEndpoints()
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
-            .WithEnvironment(HostingStartupAssembliesKey, string.Empty);
+            .WithEnvironment(_hostingStartupAssembliesKey, string.Empty);
     }
 
     /// <summary>

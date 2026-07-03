@@ -28,6 +28,8 @@ public static class EntraAuthServiceCollectionExtensions
         var entraOptions = configuration.GetSection(EntraAuthOptions.SectionName).Get<EntraAuthOptions>()
             ?? new EntraAuthOptions();
 
+        ValidateEntraOptions(configuration, entraOptions);
+
         services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -52,6 +54,11 @@ public static class EntraAuthServiceCollectionExtensions
                 options.CallbackPath = entraOptions.CallbackPath;
                 options.SignedOutCallbackPath = entraOptions.SignedOutCallbackPath;
                 options.ResponseType = OpenIdConnectResponseType.Code;
+                // Use query response mode (GET callback) instead of the default form_post.
+                // Entra External ID is cross-site to the app origin; a cross-site POST callback
+                // would drop the SameSite=Lax correlation/nonce cookies ("Correlation failed").
+                // A top-level GET redirect sends Lax cookies, so the code exchange succeeds.
+                options.ResponseMode = OpenIdConnectResponseMode.Query;
                 options.SaveTokens = false;
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.CorrelationCookie.Path = "/";
@@ -101,5 +108,34 @@ public static class EntraAuthServiceCollectionExtensions
         services.AddAuthorization();
 
         return services;
+    }
+
+    private static void ValidateEntraOptions(IConfiguration configuration, EntraAuthOptions entraOptions)
+    {
+        var provider = configuration.GetSection(AuthOptions.SectionName).Get<AuthOptions>()?.Provider;
+        if (!string.Equals(provider, EntraAuthProvider.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(entraOptions.Authority)
+            && Guid.TryParse(entraOptions.TenantId, out _))
+        {
+            Console.Error.WriteLine(
+                "Warning: Auth:Entra:Authority is unset but TenantId is a GUID. CIAM tenants require a ciamlogin.com authority.");
+        }
+
+        var isDevelopment = string.Equals(
+            configuration["ASPNETCORE_ENVIRONMENT"],
+            "Development",
+            StringComparison.OrdinalIgnoreCase);
+
+        if (isDevelopment
+            && string.IsNullOrWhiteSpace(entraOptions.ClientId)
+            && string.IsNullOrWhiteSpace(configuration["KeyVault:VaultUri"]))
+        {
+            throw new InvalidOperationException(
+                "Auth:Entra:ClientId or KeyVault:VaultUri must be configured when Auth:Provider is Entra in Development.");
+        }
     }
 }

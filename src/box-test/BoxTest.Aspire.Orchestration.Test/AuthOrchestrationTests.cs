@@ -1,5 +1,7 @@
 using BoxBottom.Aspire.Orchestration;
+using BoxBottom.Auth.Aspire;
 using BoxBottom.Auth.Emulation;
+using BoxBottom.Auth.Entra;
 using BoxBottom.Auth.ZeroAuth;
 using Xunit;
 
@@ -22,6 +24,43 @@ public class AuthOrchestrationTests
             EntraEmulationRegistryExtensions.EntraEmulationKey,
             box["users-api"].EnvironmentVariables.Keys);
         Assert.Equal(ZeroAuthAuthProvider.Name, bob["users-api"].EnvironmentVariables["Auth__Provider"]);
+    }
+
+    [Fact]
+    public void BoeStackDerivedFromBox_DoesNotInheritEmulationEnvironmentVariables()
+    {
+        var box = CreateUsersStack("box");
+        box["users-api"].EnvironmentVariables[EntraEmulationRegistryExtensions.EntraEmulationKey] =
+            """{"singletons":{"Entra":{"provider":"Entra"}}}""";
+
+        var boe = box with { Name = EntraProofOrchestrationConfiguration.BoeStackName };
+
+        Assert.DoesNotContain(
+            EntraEmulationRegistryExtensions.EntraEmulationKey,
+            boe["users-api"].EnvironmentVariables.Keys);
+    }
+
+    [Fact]
+    public void ConfigureBoeStack_SetsRealEntraEnvironmentVariables()
+    {
+        var boe = CreateUsersStack(EntraProofOrchestrationConfiguration.BoeStackName);
+
+        EntraProofOrchestrator.ConfigureBoeStack(boe);
+
+        var env = boe["users-api"].EnvironmentVariables;
+        Assert.Equal(EntraAuthProvider.Name, env["Auth__Provider"]);
+        Assert.Equal(
+            EntraProofOrchestrationConfiguration.DefaultEntraAuthority,
+            env["Auth__Entra__Authority"]);
+        Assert.Equal(
+            EntraProofOrchestrationConfiguration.DefaultEntraTenantId,
+            env["Auth__Entra__TenantId"]);
+        Assert.DoesNotContain(EntraEmulationRegistryExtensions.EntraEmulationKey, env.Keys);
+
+        // ClientId and KeyVault URI are no longer injected as env vars; ClientId comes from
+        // Key Vault (auth-entra-client-id) and the vault URI from appsettings.Development.json.
+        Assert.DoesNotContain("Auth__Entra__ClientId", env.Keys);
+        Assert.DoesNotContain("KeyVault__VaultUri", env.Keys);
     }
 
     private static StackDefinition CreateUsersStack(string name)

@@ -243,6 +243,17 @@ public/build/
 !.cursor/skills/
 !.cursor/skills-cursor/
 
+# Terraform
+infra/entra-proof/.terraform/
+infra/entra-proof/terraform.tfvars
+infra/entra-proof/*.tfstate
+infra/entra-proof/*.tfstate.*
+infra/entra-proof/crash.log
+infra/entra-proof/override.tf
+infra/entra-proof/override.tf.json
+infra/entra-proof/*_override.tf
+infra/entra-proof/*_override.tf.json
+
 # =============================================================================
 # OS / Environment
 # =============================================================================

@@ -11,8 +11,8 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
 {
     public const string ToolsCategoryName = "tools";
     public const string SupportCategoryName = "support";
-    private const string WebLogicalName = "web";
-    private const string EdgeLogicalName = "edge";
+    private const string _webLogicalName = "web";
+    private const string _edgeLogicalName = "edge";
 
     private readonly IDistributedApplicationBuilder _builder = builder;
     private IResourceBuilder<CategoryResource>? _toolsCategory;
@@ -86,12 +86,12 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
                 playwright = AddPlaywrightHttpEndpoint(
                     playwright,
                     stackName,
-                    WebLogicalName,
+                    _webLogicalName,
                     stack.Web.GetEndpoint("http"));
                 playwright = AddPlaywrightHttpEndpoint(
                     playwright,
                     stackName,
-                    EdgeLogicalName,
+                    _edgeLogicalName,
                     stack.Edge.GetEndpoint("http"));
                 playwright = AddPlaywrightHttpEndpoint(
                     playwright,
@@ -172,7 +172,7 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
             .WaitFor(edge)
             .WithEnvironment("EDGE_HTTP", edgeHttpEndpoint.Property(EndpointProperty.Url))
             .WithEnvironment(
-                BuildHttpEnvironmentVariable(stack.Name, WebLogicalName),
+                BuildHttpEnvironmentVariable(stack.Name, _webLogicalName),
                 webHttpEndpoint.Property(EndpointProperty.Url))
             .WithEnvironment(
                 BuildHttpEnvironmentVariable(stack.Name, stack.Edge.LogicalName),

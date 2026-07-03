@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BoxBottom.Aspire.Orchestration\BoxBottom.Aspire.Orchestration.csproj" />
     <ProjectReference Include="..\BoxBottom.Auth.Emulation\BoxBottom.Auth.Emulation.csproj" />
+    <ProjectReference Include="..\BoxBottom.Auth.Entra\BoxBottom.Auth.Entra.csproj" />
   </ItemGroup>
 
   <ItemGroup>

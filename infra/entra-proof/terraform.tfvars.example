@@ -1,0 +1,14 @@
+# Copy to terraform.tfvars and adjust as needed.
+# subscription_id = "acf84f87-9597-43fd-9994-761c094389fa"
+# tenant_id       = "9af8af7b-10ee-4bd5-b71c-20daa8e37878"
+# location        = "eastus2"
+# resource_group_name = "rdbox-rg"
+# key_vault_name  = "rdbox-kv"
+
+# Portless loopback URI — Entra ignores the port at runtime (RFC 8252).
+oidc_redirect_uris = [
+  "http://localhost/api/users/signin-oidc",
+]
+
+# Optional: set if azurerm_client_config.object_id is not the deployer.
+# deployer_object_id = "00000000-0000-0000-0000-000000000000"

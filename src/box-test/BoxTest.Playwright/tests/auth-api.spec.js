@@ -77,3 +77,25 @@ test('box users-api rejects zero auth when entra configured', async ({ request }
 
   expect(loginResponse.status()).toBe(403)
 })
+
+test('boe users-api rejects zero auth when entra configured', async ({ request }) => {
+  const boeUsers = stackHttp('boe', 'users-api')
+  test.skip(!boeUsers, 'boe users-api is not configured')
+
+  const configResponse = await request.get(`${boeUsers}/api/Auth/config`)
+  test.skip(!configResponse.ok(), 'boe users-api auth is not configured')
+
+  const config = await configResponse.json()
+  test.skip(config.provider !== 'Entra', 'boe stack is not configured for Entra')
+
+  const loginResponse = await request.post(`${boeUsers}/api/Auth/zero/login`, {
+    data: {
+      provider: 'ZeroAuth',
+      externalId: 'playwright-user',
+      displayName: 'Playwright User',
+      email: 'playwright@example.com',
+    },
+  })
+
+  expect(loginResponse.status()).toBe(403)
+})

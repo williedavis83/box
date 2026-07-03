@@ -3,9 +3,11 @@ using BoxBottom.Emulation;
 using BoxPack.Auth.Customization;
 using BoxPack.Users.Customization;
 using BoxPack.Users.Customization.Controllers;
+using BoxTop.Users.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddBoxKeyVaultConfiguration();
 builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
