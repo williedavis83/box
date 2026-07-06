@@ -50,6 +50,7 @@ public class AuthServiceCollectionTests
 
         Assert.NotNull(provider.GetRequiredService<IAuthService<UserProfile>>());
         Assert.NotNull(provider.GetRequiredService<IEntraClaimsMapper>());
+        Assert.NotNull(provider.GetRequiredService<IZeroAuthRequestValidator>());
         Assert.Equal(
             EntraAuthProvider.Name,
             provider.GetRequiredService<IAuthProviderGuard>().ActiveProviderName);

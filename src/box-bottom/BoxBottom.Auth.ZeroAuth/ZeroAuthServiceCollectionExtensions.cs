@@ -14,8 +14,7 @@ public static class ZeroAuthServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        services.Configure<ZeroAuthOptions>(configuration.GetSection(ZeroAuthOptions.SectionName));
-        services.AddSingleton<IZeroAuthRequestValidator, ZeroAuthRequestValidator>();
+        services.AddZeroAuthSupportServices(configuration);
 
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -28,6 +27,22 @@ public static class ZeroAuthServiceCollectionExtensions
 
         services.AddAuthorization();
 
+        return services;
+    }
+
+    /// <summary>
+    /// Registers ZeroAuth options and request validation without cookie authentication.
+    /// Always registered so the zero/login endpoint can return 403 when another provider is active.
+    /// </summary>
+    public static IServiceCollection AddZeroAuthSupportServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        services.Configure<ZeroAuthOptions>(configuration.GetSection(ZeroAuthOptions.SectionName));
+        services.AddSingleton<IZeroAuthRequestValidator, ZeroAuthRequestValidator>();
         return services;
     }
 }

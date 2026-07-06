@@ -19,7 +19,7 @@ test('bob zero auth login shows user menu and profile tab', async ({ page }) => 
   await page.getByRole('button', { name: 'User Profile' }).click()
 
   await expect(page.getByRole('heading', { name: 'User Profile' })).toBeVisible()
-  await expect(page.getByDisplayValue('Dev User')).toBeVisible()
+  await expect(page.getByLabel('Display name')).toHaveValue('Dev User')
   await expect(mainNav.getByRole('button', { name: 'User Profile', exact: true })).toBeVisible()
 
   await page.getByRole('button', { name: 'Hello', exact: true }).click()

@@ -23,6 +23,8 @@ public static class AuthServiceCollectionExtensions
 
         services.Configure<AuthOptions>(configuration.GetSection(AuthOptions.SectionName));
 
+        services.AddZeroAuthSupportServices(configuration);
+
         services.AddSingleton<IExternalUserMapper<ExternalUser>, ExternalUserIdentityMapper>();
         services.AddExternalUsersData<ExternalUser>(UserTableKeys.Users);
         services.AddAuthBusiness<UserProfile, UpdateUserProfileRequest>();
