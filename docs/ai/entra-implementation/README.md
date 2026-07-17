@@ -34,10 +34,12 @@ az login
 dotnet run --project src/box-top/BoxTop.Aspire
 ```
 
-The `box` (Keycloak) and `bob` (ZeroAuth) stacks disable Key Vault and require no Azure
-credentials. See [box-application-wiring.md](./box-application-wiring.md) for the full
-configuration flow, and [`infra/entra-proof/README.md`](../../../infra/entra-proof/README.md)
-for `terraform apply` and the External ID portal steps.
+The `box` stack receives Keycloak settings through the auth emulation document after
+Key Vault configuration is loaded. The `bob` stack selects ZeroAuth and skips Entra
+vault loading. See [box-application-wiring.md](./box-application-wiring.md) for the
+full configuration flow, and
+[`infra/entra-proof/README.md`](../../../infra/entra-proof/README.md) for `terraform
+apply` and the External ID portal steps.
 
 ## Stack layout
 

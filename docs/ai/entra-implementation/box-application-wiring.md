@@ -107,17 +107,21 @@ environment variables are required.
 `boe` `users-api` gets its identity from Key Vault, not env vars:
 
 ```text
-Auth__Provider=Entra                     # from EntraProofOrchestrator
-Auth__Entra__TenantId=<CIAM tenant>      # from EntraProofOrchestrator (default)
-KeyVault__VaultUri=https://rdbox-kv...   # from appsettings.Development.json
+Auth:Provider=Entra                      # from appsettings.json
+Auth:Entra:TenantId=<CIAM tenant>        # from appsettings.json
+KeyVault:VaultUri=https://rdbox-kv...    # from appsettings.Development.json
 Auth__Entra__PublicOrigin=<boe web URL>  # wired post-orchestrate
 Auth__Entra__ClientId=<Key Vault: auth-entra-client-id>
 Auth__Entra__ClientSecret=<Key Vault: auth-entra-client-secret>
 Auth__Entra__Authority=<Key Vault: auth-entra-authority>
 ```
 
-`box` and `bob` set `KeyVault__VaultUri=""` so they never load Key Vault. Secrets map to
-config keys via [`BoxKeyVaultSecretManager`](../../../src/box-top/BoxTop.Users.Api/Configuration/BoxKeyVaultSecretManager.cs)
+`box` receives its Keycloak authority, tenant, client, secret, and public origin through
+the `Auth_Emulation` document. The Entra emulation applier adds those values after Key
+Vault, so the emulator wins through the same configuration path used by real Entra.
+`bob` sets `Auth__Provider=ZeroAuth`; because Entra is inactive, it does not load Key
+Vault. Secrets map to config keys via
+[`BoxKeyVaultSecretManager`](../../../src/box-top/BoxTop.Users.Api/Configuration/BoxKeyVaultSecretManager.cs)
 (`auth-entra-*` → `Auth:Entra:*`).
 
 ## Frontend

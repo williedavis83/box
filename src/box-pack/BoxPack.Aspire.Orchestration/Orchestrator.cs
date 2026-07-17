@@ -79,27 +79,17 @@ public static class Orchestrator
 
 
         StackDefinition? boeStack = boxStack with { Name = EntraProofOrchestrationConfiguration.BoeStackName };
-        EntraProofOrchestrator.ConfigureBoeStack(boeStack);
+        boeStack.AsIntegrationStack();
 
         boxStack["users-api"].WithEntraEmulation(stackOperations);
 
-        // Only the boe stack uses real Entra + Key Vault. box (Keycloak) and bob (ZeroAuth)
-        // disable Key Vault so they never require Azure credentials and never let vault secrets
-        // override their local auth configuration.
-        boxStack["users-api"].EnvironmentVariables[EntraProofOrchestrationConfiguration.KeyVaultUriEnvironmentVariable] =
-            string.Empty;
-
         var bobStack = boxStack with { Name = _bobStackName };
+        bobStack.AsIntegrationStack();
 
         bobStack["secondary-api"].EnvironmentVariables[_worldMessageEnvironmentVariable] = "Bob";
 
         bobStack["users-api"].EnvironmentVariables[_authProviderEnvironmentVariable] =
-
             ZeroAuthAuthProvider.Name;
-
-        bobStack["users-api"].EnvironmentVariables[EntraProofOrchestrationConfiguration.KeyVaultUriEnvironmentVariable] =
-
-            string.Empty;
 
 
 

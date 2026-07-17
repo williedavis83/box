@@ -47,11 +47,61 @@ public record StackDefinition
 
     public ApiProjectOptions this[string logicalName] => _apis[logicalName];
 
+    /// <summary>
+    /// Marks this stack as an integration stack: its resources start only on demand and are
+    /// grouped under the Playwright tool in the Aspire dashboard.
+    /// </summary>
+    public bool IsIntegrationStack { get; private set; }
+
+    /// <summary>
+    /// Marks this stack as an integration stack. Call before <see cref="StackOperations.OrchestrateStack"/>.
+    /// </summary>
+    public StackDefinition AsIntegrationStack()
+    {
+        IsIntegrationStack = true;
+        return this;
+    }
+
     public void AddApi(ApiProjectOptions api)
     {
         ArgumentNullException.ThrowIfNull(api);
         ArgumentException.ThrowIfNullOrWhiteSpace(api.LogicalName);
         _apis.Add(api.LogicalName, api with { StackPrefix = _name, EnvironmentVariables = api.EnvironmentVariables });
+    }
+
+    /// <summary>
+    /// Enables Dapr sidecars based on AppHost config and <see cref="ApiProjectOptions.ApiReferences"/>.
+    /// When <paramref name="defaultStart"/> is true, every API gets a sidecar. Otherwise only
+    /// APIs that reference another API (and their callees) get sidecars.
+    /// </summary>
+    public void ApplyDaprSidecarFromApiReferences(bool defaultStart = false)
+    {
+        if (defaultStart)
+        {
+            foreach (var api in _apis.Values)
+            {
+                api.EnableDaprSidecar = true;
+            }
+
+            return;
+        }
+
+        foreach (var api in _apis.Values)
+        {
+            foreach (var referencedLogicalName in api.ApiReferences)
+            {
+                ArgumentException.ThrowIfNullOrWhiteSpace(referencedLogicalName);
+
+                if (!_apis.TryGetValue(referencedLogicalName, out var referencedApi))
+                {
+                    throw new InvalidOperationException(
+                        $"API '{api.LogicalName}' references unknown API '{referencedLogicalName}' in stack '{Name}'.");
+                }
+
+                api.EnableDaprSidecar = true;
+                referencedApi.EnableDaprSidecar = true;
+            }
+        }
     }
 
     public IEnumerable<ApiProjectOptions> GetApis() => _apis.Values;
@@ -79,6 +129,7 @@ public record StackDefinition
 
         _apis = new Dictionary<string, ApiProjectOptions>(StringComparer.OrdinalIgnoreCase);
         _name = original._name;
+        IsIntegrationStack = original.IsIntegrationStack;
         Web = new WebProjectOptions(original.Web);
         Edge = new EdgeProjectOptions(original.Edge);
         Meta = new MetaProjectOptions(original.Meta);

@@ -13,4 +13,8 @@ public sealed class StackResources
     public required IResourceBuilder<ProjectResource> Meta { get; init; }
 
     public required IReadOnlyDictionary<string, IResourceBuilder<ProjectResource>> Apis { get; init; }
+
+    public bool IsIntegrationStack { get; set; }
+
+    public string StackName { get; init; } = string.Empty;
 }

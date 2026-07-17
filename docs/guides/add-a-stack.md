@@ -38,11 +38,9 @@ mooStack["secondary-api"].EnvironmentVariables["World__Message"] = "Moo";
 mooStack["primary-api"].WithAzureTableEmulation(stackOperations, /* ... */);
 ```
 
-If the stack must stay fully offline (like `box`/`bob`), disable Key Vault explicitly:
-
-```csharp
-mooStack["users-api"].EnvironmentVariables["KeyVault__VaultUri"] = string.Empty;
-```
+Stacks selecting ZeroAuth skip Entra Key Vault loading automatically. Entra emulators
+should transmit their provider configuration through an emulation document instead of
+overriding `Auth__Entra__*` environment variables directly.
 
 ## 3. Orchestrate it
 

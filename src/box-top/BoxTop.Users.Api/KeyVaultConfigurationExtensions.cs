@@ -7,6 +7,12 @@ internal static class KeyVaultConfigurationExtensions
 {
     public static WebApplicationBuilder AddBoxKeyVaultConfiguration(this WebApplicationBuilder builder)
     {
+        var authProvider = builder.Configuration["Auth:Provider"];
+        if (!string.Equals(authProvider, "Entra", StringComparison.OrdinalIgnoreCase))
+        {
+            return builder;
+        }
+
         var vaultUri = builder.Configuration["KeyVault:VaultUri"];
         if (string.IsNullOrWhiteSpace(vaultUri))
         {

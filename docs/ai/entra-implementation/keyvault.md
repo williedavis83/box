@@ -6,8 +6,9 @@
 - `Microsoft.KeyVault` resource provider is **Registered**.
 - `users-api` loads Entra secrets from Key Vault when `KeyVault:VaultUri` is set
   ([`KeyVaultConfigurationExtensions`](../../../src/box-top/BoxTop.Users.Api/KeyVaultConfigurationExtensions.cs)).
-  The `boe` stack sets the URI (in `appsettings.Development.json`); `box`/`bob` set it empty
-  and never touch Azure.
+  The URI comes from `appsettings.Development.json`. `bob` selects ZeroAuth before
+  startup and skips the Entra vault provider; `box` applies its transmitted Keycloak
+  configuration after Key Vault so emulation values take precedence.
 
 ## Recommended vault
 
@@ -109,8 +110,9 @@ Environment variable overrides still work via `Auth__Entra__*` (double underscor
 ### Option C — local Aspire against real Entra (implemented as the `boe` stack)
 
 `boe` runs locally against real Entra with no Keycloak and no committed secrets: it sets
-`KeyVault:VaultUri` (from `appsettings.Development.json`) and relies on `az login` for
-`DefaultAzureCredential`. `box`/`bob` set the URI empty to stay fully offline.
+`KeyVault:VaultUri` in `appsettings.Development.json` and relies on `az login` for
+`DefaultAzureCredential`. `box` overrides the loaded Entra values through the emulation
+configuration document; `bob` selects ZeroAuth and skips the Entra vault provider.
 
 ## Rotation
 

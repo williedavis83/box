@@ -113,8 +113,9 @@ registries; `vite.config.js` proxies `/api` to the Aspire edge. **All API access
   variables. Aspire injects per-stack overrides as environment variables (`Section__Key`
   double-underscore nesting).
 - **Secrets:** never commit secrets. Deployed/`boe` secrets come from Key Vault via
-  `KeyVault:VaultUri` (see the [Entra reference](./ai/entra-implementation/keyvault.md));
-  emulated stacks set the URI empty and stay offline.
+  `KeyVault:VaultUri` (see the [Entra reference](./ai/entra-implementation/keyvault.md)).
+  Keycloak settings for `box` are transmitted in `Auth_Emulation` and applied after
+  Key Vault; `bob` selects ZeroAuth with `Auth__Provider` and skips Entra vault loading.
 - **Service defaults:** every API calls `builder.AddServiceDefaults()` and
   `app.MapDefaultEndpoints()` (health, telemetry, service discovery) from
   `BoxBottom.Aspire.ServiceDefaults`.
