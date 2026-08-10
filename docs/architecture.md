@@ -125,6 +125,8 @@ Default shell (`src/box-top/BoxTop.Web`): `main.js` installs the router and web 
   `KeyVault:VaultUri` (see the [Entra reference](./ai/entra-implementation/keyvault.md)).
   Keycloak settings for `box` are transmitted in `Auth_Emulation` and applied after
   Key Vault; `bob` selects ZeroAuth with `Auth__Provider` and skips Entra vault loading.
+  The shared Keycloak container can import multiple realms; stacks bind via
+  `KeycloakStackBinding` (see [Entra wiring](./ai/entra-implementation/box-application-wiring.md)).
 - **Service defaults:** every API calls `builder.AddServiceDefaults()` and
   `app.MapDefaultEndpoints()` (health, telemetry, service discovery) from
   `BoxBottom.Aspire.ServiceDefaults`.

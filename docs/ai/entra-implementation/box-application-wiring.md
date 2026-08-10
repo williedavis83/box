@@ -81,9 +81,28 @@ External ID users from social IdPs still expose a stable **`oid`** in the tenant
 
 | Environment | Provider | Authority source | Secret source |
 |-------------|----------|------------------|---------------|
-| Local Aspire (`box`) | Entra (emulated) | Keycloak container URL | Keycloak realm secret |
+| Local Aspire (`box`) | Entra (emulated) | Keycloak `/realms/box` | Keycloak realm secret (`box-web`) |
+| Local Aspire (extra Keycloak stack) | Entra (emulated) | Keycloak `/realms/bok` (or another registered realm) | Matching realm client secret |
 | Local Aspire (`boe`) | Entra | Key Vault / `ciamlogin.com` | Key Vault (`DefaultAzureCredential`) |
 | `bob` stack | ZeroAuth | N/A | N/A |
+
+### Multi-realm Keycloak
+
+A single Keycloak container imports every `*.json` under
+`BoxBottom.Auth.Aspire/keycloak/` (`--import-realm`). Register realms in
+`KeycloakOrchestrationConfiguration.ImportedRealms`, then bind stacks explicitly:
+
+```csharp
+KeycloakOrchestrator.WireEntraEmulationToUsersApi(
+    stackOperations,
+    stacks,
+    new KeycloakStackBinding("box", KeycloakOrchestrationConfiguration.Box),
+    new KeycloakStackBinding("bok", KeycloakOrchestrationConfiguration.Bok));
+```
+
+Each binding's `PublicOrigin` is resolved from **that stack's web HTTP endpoint**, not the
+edge URL. Multi-frontend work must keep a distinct browser-facing web origin per stack so
+OIDC redirect URIs (`{PublicOrigin}/api/users/signin-oidc`) do not collide across realms.
 
 ## Response mode (correlation)
 

@@ -27,6 +27,7 @@ public static class KeycloakOrchestrator
             return _keycloakBuilder;
         }
 
+        // Keycloak --import-realm loads every *.json in this directory (one file per realm).
         var realmImportPath = Path.Combine(AppContext.BaseDirectory, "keycloak");
 
         _keycloakBuilder = stackOperations.OrchestrateSupport(builder =>
@@ -52,28 +53,61 @@ public static class KeycloakOrchestrator
         return _keycloakBuilder;
     }
 
+    /// <summary>
+    /// Wire Keycloak Entra emulation to each stack's <c>users-api</c>, using the realm named
+    /// the same as the stack (must be registered in
+    /// <see cref="KeycloakOrchestrationConfiguration.ImportedRealms"/>).
+    /// </summary>
     public static void WireEntraEmulationToUsersApi(
         StackOperations stackOperations,
         IReadOnlyDictionary<string, StackResources> stacks,
         params string[] stackNames)
     {
+        ArgumentNullException.ThrowIfNull(stackNames);
+
+        var bindings = new KeycloakStackBinding[stackNames.Length];
+        for (var i = 0; i < stackNames.Length; i++)
+        {
+            bindings[i] = new KeycloakStackBinding(
+                stackNames[i],
+                KeycloakOrchestrationConfiguration.GetRealm(stackNames[i]));
+        }
+
+        WireEntraEmulationToUsersApi(stackOperations, stacks, bindings);
+    }
+
+    /// <summary>
+    /// Wire Keycloak Entra emulation with an explicit stack → realm binding. Each binding's
+    /// <see cref="KeycloakStackBinding.Realm"/> selects the authority/client; <c>PublicOrigin</c>
+    /// is always that stack's web HTTP URL.
+    /// </summary>
+    public static void WireEntraEmulationToUsersApi(
+        StackOperations stackOperations,
+        IReadOnlyDictionary<string, StackResources> stacks,
+        params KeycloakStackBinding[] bindings)
+    {
         ArgumentNullException.ThrowIfNull(stackOperations);
         ArgumentNullException.ThrowIfNull(stacks);
-        ArgumentNullException.ThrowIfNull(stackNames);
+        ArgumentNullException.ThrowIfNull(bindings);
 
         if (_keycloakBuilder is null)
         {
             return;
         }
 
-        foreach (var stackName in stackNames)
+        foreach (var binding in bindings)
         {
-            if (!stacks.TryGetValue(stackName, out var stackResources)
+            ArgumentNullException.ThrowIfNull(binding);
+            ArgumentException.ThrowIfNullOrWhiteSpace(binding.StackName);
+            ArgumentNullException.ThrowIfNull(binding.Realm);
+
+            if (!stacks.TryGetValue(binding.StackName, out var stackResources)
                 || !stackResources.Apis.TryGetValue("users-api", out var usersApi))
             {
                 continue;
             }
 
+            var realm = binding.Realm;
             var keycloakEndpoint = _keycloakBuilder.GetEndpoint("http");
             var webEndpoint = stackResources.Web.GetEndpoint("http");
             var keycloakUrl = keycloakEndpoint.Property(EndpointProperty.Url);
@@ -105,15 +139,20 @@ public static class KeycloakOrchestrator
                     }
 
                     context.EnvironmentVariables[EntraEmulationRegistryExtensions.EntraEmulationKey] =
-                        BuildAuthEmulationJson(keycloakHttpUrl, publicOrigin);
+                        BuildAuthEmulationJson(keycloakHttpUrl, publicOrigin, realm);
                 });
         }
     }
 
-    public static string BuildAuthEmulationJson(string keycloakHttpUrl, string publicOrigin)
+    public static string BuildAuthEmulationJson(
+        string keycloakHttpUrl,
+        string publicOrigin,
+        KeycloakRealmOptions? realm = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(keycloakHttpUrl);
         ArgumentException.ThrowIfNullOrWhiteSpace(publicOrigin);
+
+        realm ??= KeycloakOrchestrationConfiguration.Box;
 
         var document = new
         {
@@ -122,10 +161,10 @@ public static class KeycloakOrchestrator
                 [EntraEmulationRegistryExtensions.EntraAnchorName] = new EntraEmulatorAnchorConfig
                 {
                     Provider = "Entra",
-                    TenantId = KeycloakOrchestrationConfiguration.RealmName,
-                    Authority = KeycloakOrchestrationConfiguration.BuildAuthorityUri(keycloakHttpUrl),
-                    ClientId = KeycloakOrchestrationConfiguration.ClientId,
-                    ClientSecret = KeycloakOrchestrationConfiguration.ClientSecret,
+                    TenantId = realm.RealmName,
+                    Authority = KeycloakOrchestrationConfiguration.BuildAuthorityUri(keycloakHttpUrl, realm),
+                    ClientId = realm.ClientId,
+                    ClientSecret = realm.ClientSecret,
                     PublicOrigin = publicOrigin,
                 },
             },

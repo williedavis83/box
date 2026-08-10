@@ -77,6 +77,23 @@ var stacks = new Dictionary<string, StackResources>(StringComparer.OrdinalIgnore
 If `moo` needs a shared support resource, add its name to the relevant `WireTo...` call
 (several accept `params string[] stackNames`). Skip this to keep the stack lean.
 
+For **Keycloak Entra emulation**, call `users-api.WithEntraEmulation(stackOperations)` on the
+stack definition, add a realm JSON under `BoxBottom.Auth.Aspire/keycloak/` (and register it
+on `KeycloakOrchestrationConfiguration.ImportedRealms`), then bind the stack to that realm:
+
+```csharp
+KeycloakOrchestrator.WireEntraEmulationToUsersApi(
+    stackOperations,
+    stacks,
+    new KeycloakStackBinding(_mooStackName, KeycloakOrchestrationConfiguration.GetRealm("moo")));
+```
+
+`PublicOrigin` is taken from the stack's **web** HTTP URL automatically. Do not point it at
+the edge. Prefer a realm name tied to the stack (or an explicit `KeycloakStackBinding`) so
+multiple Keycloak-backed stacks can share one Keycloak container with separated identity
+spheres. Leave `bob` (ZeroAuth) and `boe` (real Entra) on their existing auth models unless
+you intentionally convert them.
+
 ## What you get for free
 
 Playwright endpoint env vars, the meta catalog, edge routes, and per-API Dapr sidecars are

@@ -235,7 +235,13 @@ public static class Orchestrator
 
 
 
-        KeycloakOrchestrator.WireEntraEmulationToUsersApi(stackOperations, stacks, _boxStackName);
+        // Shared Keycloak hosts multiple realms; bind each Keycloak-emulating stack explicitly.
+        // PublicOrigin is taken from that stack's web HTTP URL (multi-FE stacks must keep a
+        // distinct web endpoint per stack so redirect URIs stay separated).
+        KeycloakOrchestrator.WireEntraEmulationToUsersApi(
+            stackOperations,
+            stacks,
+            new KeycloakStackBinding(_boxStackName, KeycloakOrchestrationConfiguration.Box));
 
         EntraProofOrchestrator.WireRealEntraToUsersApi(stacks);
 
