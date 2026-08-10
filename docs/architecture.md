@@ -21,7 +21,9 @@ point (an options record, an anchor, a registry) that box-pack fills in.
 
 A **stack** is one complete vertical slice — a Vue `web`, a YARP `edge`, a `meta` catalog
 API, and one or more business APIs — that all share a name prefix (`box`, `bob`, `boe`).
-Stacks reuse the *same project code*; they differ only in configuration.
+Stacks usually reuse the *same project code* and differ in configuration; the web shell
+may also point at a different Vite project via `Web.ProjectPath` when products need
+distinct UI composition.
 
 - The stack name becomes the prefix on every Aspire resource: logical `users-api` in stack
   `bob` → resource `bob-users-api` (`ApiProjectOptions.StackName`).
@@ -90,18 +92,25 @@ Emulator support resources are created once regardless of how many APIs referenc
 
 ## Web (Vue) composition
 
-The web shell (`src/box-top/BoxTop.Web`) is deliberately thin: `main.js` installs the router
-and web basics; `App.vue` creates and provides the tab, user-menu, and component-host
-registries; `vite.config.js` proxies `/api` to the Aspire edge. **All API access is relative
-`/api/...` fetches** — never hard-code an origin.
+Each stack points at a **Vite shell project** via `WebProjectOptions.ProjectPath`
+(set when creating the stack, or overridden after clone — e.g. `bob` uses
+`../BoxTop.Web.Bob`). Shells share the same hosting shape; they differ in branding and which
+box-pack navigation package they depend on. Edge still proxies `/api` per stack; the browser
+never hard-codes an origin.
+
+Default shell (`src/box-top/BoxTop.Web`): `main.js` installs the router and web basics;
+`App.vue` creates and provides the tab, user-menu, and component-host registries;
+`vite.config.js` proxies `/api` to the Aspire edge.
 
 - A **view** is a `TabDefinition` (`id`, `label`, `type`, `route`, `load`, `visibility`,
   `enabled`) plus a Vue component, exported from a package's `src/index.js`.
 - Feature views live in **box-content** packages (`@foo/*`); shared primitives/registries
   live in **box-bottom** (`@box-bottom/web-components`); product composition (navigation,
   branding, users) lives in **box-pack**.
-- Tabs are aggregated in `src/box-pack/BoxPack.Web.Navigation/src/initialTabs.js`; routes are
-  derived automatically in `router.js`.
+- Tabs for the default shell are aggregated in
+  `src/box-pack/BoxPack.Web.Navigation/src/initialTabs.js`; the `bob` shell uses
+  `BoxPack.Web.Navigation.Bob`. Routes are derived automatically in each package's
+  `router.js`.
 - `visibility: requiresApiPredicate('primary-api')` hides a tab when its backend API isn't
   present in the current stack.
 - Content web packages are linked by pnpm `file:` dependencies (not vite aliases), so adding

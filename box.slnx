@@ -45,6 +45,10 @@
       <Build />
       <Deploy />
     </Project>
+    <Project Path="src/box-pack/BoxPack.Web.Navigation.Bob/BoxPack.Web.Navigation.Bob.esproj">
+      <Build />
+      <Deploy />
+    </Project>
   </Folder>
   <Folder Name="/src/box-content/">
     <Project Path="src/box-content/Bleeb.Aspire/Bleeb.Aspire.csproj" />
@@ -82,6 +86,10 @@
     <Project Path="src/box-top/BoxTop.Meta.Api/BoxTop.Meta.Api.csproj" />
     <Project Path="src/box-top/BoxTop.Users.Api/BoxTop.Users.Api.csproj" />
     <Project Path="src/box-top/BoxTop.Web/BoxTop.Web.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="src/box-top/BoxTop.Web.Bob/BoxTop.Web.Bob.esproj">
       <Build />
       <Deploy />
     </Project>

@@ -32,6 +32,9 @@ public static class Orchestrator
 
     private const string _bobStackName = "bob";
 
+    /// <summary>Vite app folder for the bob stack shell (relative to BoxTop.Aspire).</summary>
+    public const string BobWebProjectPath = "../BoxTop.Web.Bob";
+
     private const string _worldMessageEnvironmentVariable = "World__Message";
 
     private const string _authProviderEnvironmentVariable = "Auth__Provider";
@@ -85,6 +88,9 @@ public static class Orchestrator
 
         var bobStack = boxStack with { Name = _bobStackName };
         bobStack.AsIntegrationStack();
+
+        // Distinct FE shell — same Aspire shape, different project path / product composition.
+        bobStack.Web = bobStack.Web with { ProjectPath = BobWebProjectPath };
 
         bobStack["secondary-api"].EnvironmentVariables[_worldMessageEnvironmentVariable] = "Bob";
 

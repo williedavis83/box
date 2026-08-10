@@ -17,7 +17,9 @@ builder.Build().Run();
 
 internal class Constants
 {
+    /// <summary>Default Vue shell used by <see cref="StackOperations.CreateStackDefinition"/>.</summary>
     public const string DefaultWebProjectPath = "../BoxTop.Web";
+
     public const string DefaultEdgeProjectPath = @"..\BoxTop.Edge\BoxTop.Edge.csproj";
     public const string DefaultMetaProjectPath = @"..\BoxTop.Meta.Api\BoxTop.Meta.Api.csproj";
 }
