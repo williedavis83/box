@@ -21,7 +21,7 @@ everything.
 |-------|------|----------------|
 | **box-bottom** | `src/box-bottom/` | Reusable framework primitives: the Aspire orchestration engine, the emulation engine, concrete emulators/adapters (Azure Table, Auth), Dapr helpers, and shared Vue components. Nothing here knows which stacks exist. |
 | **box-pack** | `src/box-pack/` | Composition + product customization. `BoxPack.Aspire.Orchestration/Orchestrator.cs` is the one place stacks are declared and wired. Also product web packages (navigation, branding, users). |
-| **box-top** | `src/box-top/` | The concrete deployable host + shared platform services: `BoxTop.Aspire` (AppHost), `BoxTop.Edge` (proxy), `BoxTop.Meta.Api`, `BoxTop.Users.Api`, `BoxTop.Web` (Vue shell). |
+| **box-top** | `src/box-top/` | The concrete deployable host + shared platform services: `BoxTop.Aspire` (AppHost), `BoxTop.Edge` (proxy), `BoxTop.Meta.Api`, `BoxTop.Users.Api`, Vue shells (`BoxTop.Web`, `BoxTop.Web.Bob`, …). |
 | **box-content** | `src/box-content/` | Demo/business APIs and their Vue micro-frontends (`Foo.*`, `Bleeb.*`, `Blabber.*`). This is "the stuff a stack contains." |
 | **box-test** | `src/box-test/` | `BoxTest.Aspire.Orchestration.Test` (xUnit) and `BoxTest.Playwright` (end-to-end, per stack). |
 

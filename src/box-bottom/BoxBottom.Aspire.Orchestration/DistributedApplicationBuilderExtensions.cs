@@ -24,16 +24,6 @@ public static class DistributedApplicationBuilderExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(options.LogicalName);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.ProjectPath);
 
-        var daprSidecarOptions = new DaprSidecarOptions
-        {
-            AppId = options.StackName,
-            Config = _daprConfigPath,
-            ResourcesPaths = [_daprComponentsPath],
-            AppChannelAddress = options.GrpcOnlyAppChannel ? "127.0.0.1" : null,
-            AppEndpoint = options.GrpcOnlyAppChannel ? "grpc" : null,
-            AppProtocol = options.GrpcOnlyAppChannel ? "h2c" : null,
-        };
-
         var api = builder.AddProject(options.StackName, options.ProjectPath, projectOptions =>
             {
                 projectOptions.ExcludeLaunchProfile = true;
@@ -57,8 +47,22 @@ public static class DistributedApplicationBuilderExtensions
         api = api
             .WithExternalHttpEndpoints()
             .WithUrlForEndpoint("http", url => url.Url = "/scalar")
-            .WithDaprSidecar(sidecar => sidecar.WithOptions(daprSidecarOptions))
             .WithHttpHealthCheck("/health");
+
+        if (options.EnableDaprSidecar)
+        {
+            var daprSidecarOptions = new DaprSidecarOptions
+            {
+                AppId = options.StackName,
+                Config = _daprConfigPath,
+                ResourcesPaths = [_daprComponentsPath],
+                AppChannelAddress = options.GrpcOnlyAppChannel ? "127.0.0.1" : null,
+                AppEndpoint = options.GrpcOnlyAppChannel ? "grpc" : null,
+                AppProtocol = options.GrpcOnlyAppChannel ? "h2c" : null,
+            };
+
+            api = api.WithDaprSidecar(sidecar => sidecar.WithOptions(daprSidecarOptions));
+        }
 
         return api;
     }

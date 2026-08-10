@@ -38,11 +38,24 @@ mooStack["secondary-api"].EnvironmentVariables["World__Message"] = "Moo";
 mooStack["primary-api"].WithAzureTableEmulation(stackOperations, /* ... */);
 ```
 
-If the stack must stay fully offline (like `box`/`bob`), disable Key Vault explicitly:
+Stacks selecting ZeroAuth skip Entra Key Vault loading automatically. Entra emulators
+should transmit their provider configuration through an emulation document instead of
+overriding `Auth__Entra__*` environment variables directly.
+
+### Optional: distinct frontend shell
+
+`CreateStackDefinition` seeds every stack with the AppHost default web path
+(`../BoxTop.Web`). To run a different Vue shell for this stack, override
+`Web.ProjectPath` after cloning (path is relative to `BoxTop.Aspire`):
 
 ```csharp
-mooStack["users-api"].EnvironmentVariables["KeyVault__VaultUri"] = string.Empty;
+mooStack.Web = mooStack.Web with { ProjectPath = "../BoxTop.Web.Moo" };
 ```
+
+Clone an existing shell (same shape as `BoxTop.Web` / `BoxTop.Web.Bob`), point its
+`package.json` at the right box-pack navigation/branding packages, add the `.esproj` to
+`box.slnx`, and run `pnpm install` in the new shell. Edge/meta stay shared project paths;
+only the Vite app folder changes. Example in-tree: `bob` → `../BoxTop.Web.Bob`.
 
 ## 3. Orchestrate it
 

@@ -11,9 +11,10 @@ public sealed class EntraEmulationConfigurationBuilder
 
     public string EmulationKey => EntraEmulationRegistryExtensions.EntraEmulationKey;
 
-    public EntraEmulationConfigurationBuilder OverrideEntra()
+    public EntraEmulationConfigurationBuilder OverrideEntra(
+        EntraEmulatorAnchorConfig? config = null)
     {
-        _singletons["Entra"] = new EntraEmulatorAnchorConfig();
+        _singletons["Entra"] = config ?? new EntraEmulatorAnchorConfig();
         return this;
     }
 

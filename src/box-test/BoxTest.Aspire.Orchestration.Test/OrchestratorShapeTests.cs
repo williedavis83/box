@@ -67,6 +67,20 @@ public class OrchestratorShapeTests
         Assert.Equal("/api/{**catch-all}", EdgeRoutingConfiguration.BuildDefaultPrimaryRoutePath());
     }
 
+    [Fact]
+    public void WithExpression_BobCanOverrideWebProjectPathIndependently()
+    {
+        var box = CreateOrchestratorShapeStack("box");
+        var bob = box with { Name = "bob" };
+
+        bob.Web = bob.Web with { ProjectPath = "../BoxTop.Web.Bob" };
+
+        Assert.Equal("../BoxTop.Web", box.Web.ProjectPath);
+        Assert.Equal("../BoxTop.Web.Bob", bob.Web.ProjectPath);
+        Assert.Equal("bob-web", bob.Web.StackName);
+        Assert.Equal("box-web", box.Web.StackName);
+    }
+
     private static StackDefinition CreateOrchestratorShapeStack(string name)
     {
         var stack = new StackDefinition(name,

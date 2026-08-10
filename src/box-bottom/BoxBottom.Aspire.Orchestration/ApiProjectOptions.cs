@@ -21,7 +21,15 @@ public record ApiProjectOptions : IStackProjectOptions
     public bool GrpcOnlyAppChannel { get; init; }
 
     /// <summary>
-    /// Dapr app IDs of APIs this project is allowed to invoke.
+    /// When true, Aspire attaches a Dapr sidecar for this API.
+    /// Defaults to false; set by <see cref="StackDefinition.ApplyDaprSidecarFromApiReferences"/>
+    /// when this API references another API or is referenced by one.
+    /// </summary>
+    public bool EnableDaprSidecar { get; set; }
+
+    /// <summary>
+    /// Logical names of APIs this project invokes via Dapr. Declaring a reference enables
+    /// sidecars on both this API and each referenced API.
     /// </summary>
     public List<string> ApiReferences { get; init; } = [];
 
@@ -35,6 +43,7 @@ public record ApiProjectOptions : IStackProjectOptions
         string stackPrefix = "",
         string aspNetEnvironment = "Development",
         bool grpcOnlyAppChannel = false,
+        bool enableDaprSidecar = false,
         List<string>? apiReferences = null,
         Dictionary<string, string>? environmentVariables = null)
     {
@@ -43,6 +52,7 @@ public record ApiProjectOptions : IStackProjectOptions
         StackPrefix = stackPrefix;
         AspNetEnvironment = aspNetEnvironment;
         GrpcOnlyAppChannel = grpcOnlyAppChannel;
+        EnableDaprSidecar = enableDaprSidecar;
         ApiReferences = apiReferences is null ? [] : [..apiReferences];
         EnvironmentVariables = environmentVariables is null
             ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -63,6 +73,7 @@ public record ApiProjectOptions : IStackProjectOptions
         StackPrefix = other.StackPrefix;
         AspNetEnvironment = other.AspNetEnvironment;
         GrpcOnlyAppChannel = other.GrpcOnlyAppChannel;
+        EnableDaprSidecar = other.EnableDaprSidecar;
         ApiReferences = [..other.ApiReferences];
         EnvironmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     }

@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.JavaScript;
+using Microsoft.Extensions.Configuration;
 
 namespace BoxBottom.Aspire.Orchestration;
 
@@ -11,12 +12,15 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
 {
     public const string ToolsCategoryName = "tools";
     public const string SupportCategoryName = "support";
+    public const string DefaultPlaywrightResourceName = "playwright-ui";
     private const string _webLogicalName = "web";
     private const string _edgeLogicalName = "edge";
 
     private readonly IDistributedApplicationBuilder _builder = builder;
     private IResourceBuilder<CategoryResource>? _toolsCategory;
     private IResourceBuilder<CategoryResource>? _supportCategory;
+    private IResourceBuilder<JavaScriptAppResource>? _playwright;
+    private readonly List<StackResources> _pendingIntegrationStacks = [];
 
     public EmulationOrchestrationState Emulation { get; } = new();
 
@@ -62,7 +66,7 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
     public IResourceBuilder<JavaScriptAppResource> OrchestratePlaywrightTool(
         IReadOnlyDictionary<string, StackResources> stacks,
         string playwrightProjectPath,
-        string resourceName = "playwright-ui",
+        string resourceName = DefaultPlaywrightResourceName,
         string runScriptName = "test")
     {
         ArgumentNullException.ThrowIfNull(stacks);
@@ -70,7 +74,7 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
         ArgumentException.ThrowIfNullOrWhiteSpace(runScriptName);
 
-        return OrchestrateTool(appBuilder =>
+        _playwright = OrchestrateTool(appBuilder =>
         {
             var playwright = appBuilder.AddJavaScriptApp(resourceName, playwrightProjectPath, runScriptName: runScriptName)
                 .WithPnpm()
@@ -78,10 +82,19 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
 
             foreach (var (stackName, stack) in stacks)
             {
-                playwright = playwright
-                    .WaitFor(stack.Web)
-                    .WaitFor(stack.Edge)
-                    .WaitFor(stack.Meta);
+                // Integration stacks are started on demand; do not block Playwright on them.
+                if (!stack.IsIntegrationStack)
+                {
+                    playwright = playwright
+                        .WaitFor(stack.Web)
+                        .WaitFor(stack.Edge)
+                        .WaitFor(stack.Meta);
+
+                    foreach (var api in stack.Apis.Values)
+                    {
+                        playwright = playwright.WaitFor(api);
+                    }
+                }
 
                 playwright = AddPlaywrightHttpEndpoint(
                     playwright,
@@ -101,7 +114,6 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
 
                 foreach (var (apiLogicalName, api) in stack.Apis)
                 {
-                    playwright = playwright.WaitFor(api);
                     playwright = AddPlaywrightHttpEndpoint(
                         playwright,
                         stackName,
@@ -112,6 +124,15 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
 
             return playwright;
         });
+
+        foreach (var stack in _pendingIntegrationStacks)
+        {
+            AttachIntegrationStackToPlaywright(stack);
+        }
+
+        _pendingIntegrationStacks.Clear();
+
+        return _playwright;
     }
 
     public static string BuildHttpEnvironmentVariable(string stackName, string logicalName)
@@ -139,6 +160,11 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
     public StackResources OrchestrateStack(StackDefinition stack)
     {
         ArgumentNullException.ThrowIfNull(stack);
+
+        var defaultDaprSidecarStart = _builder.Configuration.GetValue(
+            DaprSidecarConfiguration.StartKey,
+            defaultValue: false);
+        stack.ApplyDaprSidecarFromApiReferences(defaultDaprSidecarStart);
 
         var apis = stack.GetApis().ToDictionary(
             api => api.LogicalName,
@@ -182,13 +208,70 @@ public sealed class StackOperations(IDistributedApplicationBuilder builder,
             BuildHttpEnvironmentVariable(stack.Name, MetaCatalogConfiguration.MetaLogicalName),
             metaHttpEndpoint.Property(EndpointProperty.Url));
 
-        return new StackResources
+        var resources = new StackResources
         {
             Web = web,
             Edge = edge,
             Meta = meta,
             Apis = apis,
+            IsIntegrationStack = stack.IsIntegrationStack,
+            StackName = stack.Name,
         };
+
+        if (stack.IsIntegrationStack)
+        {
+            AsIntegrationStack(resources);
+        }
+
+        return resources;
+    }
+
+    /// <summary>
+    /// Groups the stack under Playwright and marks every stack resource as explicit-start.
+    /// Prefer marking via <see cref="StackDefinition.AsIntegrationStack"/> before orchestration;
+    /// this method applies the dashboard/lifecycle wiring.
+    /// </summary>
+    public StackResources AsIntegrationStack(StackResources stack)
+    {
+        ArgumentNullException.ThrowIfNull(stack);
+
+        stack.IsIntegrationStack = true;
+
+        stack.Web.WithExplicitStart();
+        stack.Edge.WithExplicitStart();
+        stack.Meta.WithExplicitStart();
+
+        foreach (var api in stack.Apis.Values)
+        {
+            api.WithExplicitStart();
+        }
+
+        if (_playwright is null)
+        {
+            _pendingIntegrationStacks.Add(stack);
+        }
+        else
+        {
+            AttachIntegrationStackToPlaywright(stack);
+        }
+
+        return stack;
+    }
+
+    private void AttachIntegrationStackToPlaywright(StackResources stack)
+    {
+        if (_playwright is null)
+        {
+            throw new InvalidOperationException(
+                "Playwright must be orchestrated before attaching integration stacks.");
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(stack.StackName);
+
+        var group = _builder.AddCategory(stack.StackName)
+            .WithParentRelationship(_playwright.Resource);
+
+        stack.Web.WithParentRelationship(group.Resource);
     }
 
 }

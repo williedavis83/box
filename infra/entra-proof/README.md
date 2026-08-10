@@ -36,8 +36,9 @@ az login
 dotnet run --project src/box-top/BoxTop.Aspire
 ```
 
-The **box** (Keycloak) and **bob** (ZeroAuth) stacks disable Key Vault and run
-without any Azure credentials; only the **boe** stack reads from Key Vault.
+The **box** stack replaces the loaded Entra values with Keycloak values through the
+auth emulation document. The **bob** stack selects ZeroAuth and skips the Entra Key
+Vault provider.
 
 If the vault name differs from `rdbox-kv`, update `KeyVault:VaultUri` in
 `appsettings.Development.json` (or override `KeyVault__VaultUri` for a single run):

@@ -4,8 +4,10 @@ This adds a new Vue view/tab to the web app. See [../architecture.md](../archite
 for the web composition model.
 
 A **view** is a `TabDefinition` + a Vue component, exported from a package's `src/index.js`.
-Feature views live in their own **box-content** package and are registered once in
-**box-pack** navigation. The web shell (`BoxTop.Web`) needs no changes.
+Feature views live in their own **box-content** package and are registered in the
+**box-pack** navigation package(s) used by each shell. Thin shells (`BoxTop.Web`,
+`BoxTop.Web.Bob`, …) usually need no changes — only the navigation package that shell
+depends on.
 
 Example: a `Widgets` view backed by `primary-api`.
 
