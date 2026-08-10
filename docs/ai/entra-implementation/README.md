@@ -45,9 +45,15 @@ apply` and the External ID portal steps.
 
 | Stack | Auth | Notes |
 |-------|------|-------|
-| `box` | Keycloak emulation | Default local dev; no Azure needed |
+| `box` | Keycloak emulation (`box` realm) | Default local dev; no Azure needed |
 | `bob` | ZeroAuth | Dev JSON login; no Azure needed |
 | `boe` | Real Entra External ID | Reads Key Vault; requires `az login` |
+
+One Keycloak container can host **multiple realms** (today: `box` and `bok`). Stacks that
+use Entra emulation pick a realm via `KeycloakStackBinding` in `Orchestrator.cs`;
+`PublicOrigin` is always that stack's web URL. The `bok` realm is imported and ready for
+another Keycloak-backed stack (e.g. a second FE shell) without converting `bob`/`boe`.
+See [box-application-wiring.md](./box-application-wiring.md).
 
 ## Documents
 
