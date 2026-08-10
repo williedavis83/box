@@ -9,29 +9,29 @@ importers:
   .:
     dependencies:
       '@box-bottom/web-components':
-        specifier: file:../../box-bottom/BoxBottom.Web.Components
+        specifier: file:..\..\box-bottom\BoxBottom.Web.Components
         version: file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.2.0(@vue/compiler-sfc@3.5.41)(rolldown@1.2.3)(vite@8.2.1(yaml@2.9.0))(vue@3.5.41))(vue@3.5.41)
       '@box-pack/users-web':
-        specifier: file:../../box-pack/BoxPack.Users.Web
+        specifier: file:..\..\box-pack\BoxPack.Users.Web
         version: file:../../box-pack/BoxPack.Users.Web(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.2.0(@vue/compiler-sfc@3.5.41)(rolldown@1.2.3)(vite@8.2.1(yaml@2.9.0))(vue@3.5.41))(vue@3.5.41))(vue-router@5.2.0(@vue/compiler-sfc@3.5.41)(rolldown@1.2.3)(vite@8.2.1(yaml@2.9.0))(vue@3.5.41))(vue@3.5.41)
       '@box-pack/web-basics':
-        specifier: file:../../box-pack/BoxPack.Web.Basics
+        specifier: file:..\..\box-pack\BoxPack.Web.Basics
         version: file:../../box-pack/BoxPack.Web.Basics
       '@box-pack/web-navigation-bob':
-        specifier: file:../../box-pack/BoxPack.Web.Navigation.Bob
+        specifier: file:..\..\box-pack\BoxPack.Web.Navigation.Bob
         version: file:../../box-pack/BoxPack.Web.Navigation.Bob(@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components(vue-router@5.2.0(@vue/compiler-sfc@3.5.41)(rolldown@1.2.3)(vite@8.2.1(yaml@2.9.0))(vue@3.5.41))(vue@3.5.41))(vue-router@5.2.0(@vue/compiler-sfc@3.5.41)(rolldown@1.2.3)(vite@8.2.1(yaml@2.9.0))(vue@3.5.41))(vue@3.5.41)
       vue:
-        specifier: ^3.5.35
+        specifier: ^3.5.41
         version: 3.5.41
       vue-router:
-        specifier: ^5.1.0
+        specifier: ^5.2.0
         version: 5.2.0(@vue/compiler-sfc@3.5.41)(rolldown@1.2.3)(vite@8.2.1(yaml@2.9.0))(vue@3.5.41)
     devDependencies:
       '@vitejs/plugin-vue':
-        specifier: ^6.0.7
+        specifier: ^6.0.8
         version: 6.0.8(vite@8.2.1(yaml@2.9.0))(vue@3.5.41)
       vite:
-        specifier: ^8.0.16
+        specifier: ^8.2.1
         version: 8.2.1(yaml@2.9.0)
 
 packages:
@@ -77,22 +77,22 @@ packages:
   '@box-bottom/web-components@file:../../box-bottom/BoxBottom.Web.Components':
     resolution: {directory: ../../box-bottom/BoxBottom.Web.Components, type: directory}
     peerDependencies:
-      vue: ^3.5.0
-      vue-router: ^5.0.0
+      vue: ^3.5.41
+      vue-router: ^5.2.0
 
   '@box-bottom/web-emulation@file:../../box-bottom/BoxBottom.Web.Emulation':
     resolution: {directory: ../../box-bottom/BoxBottom.Web.Emulation, type: directory}
     peerDependencies:
       '@box-bottom/web-components': ^0.0.0
-      vue: ^3.5.0
-      vue-router: ^5.0.0
+      vue: ^3.5.41
+      vue-router: ^5.2.0
 
   '@box-pack/users-web@file:../../box-pack/BoxPack.Users.Web':
     resolution: {directory: ../../box-pack/BoxPack.Users.Web, type: directory}
     peerDependencies:
       '@box-bottom/web-components': ^0.0.0
-      vue: ^3.5.0
-      vue-router: ^5.0.0
+      vue: ^3.5.41
+      vue-router: ^5.2.0
 
   '@box-pack/web-basics@file:../../box-pack/BoxPack.Web.Basics':
     resolution: {directory: ../../box-pack/BoxPack.Web.Basics, type: directory}
@@ -100,25 +100,25 @@ packages:
   '@box-pack/web-navigation-bob@file:../../box-pack/BoxPack.Web.Navigation.Bob':
     resolution: {directory: ../../box-pack/BoxPack.Web.Navigation.Bob, type: directory}
     peerDependencies:
-      vue-router: ^5.0.0
+      vue-router: ^5.2.0
 
   '@foo/azure-table-web@file:../../box-content/Foo.AzureTable.Web':
     resolution: {directory: ../../box-content/Foo.AzureTable.Web, type: directory}
     peerDependencies:
       '@box-bottom/web-components': ^0.0.0
-      vue: ^3.5.0
+      vue: ^3.5.41
 
   '@foo/blabber-web@file:../../box-content/Foo.Blabber.Web':
     resolution: {directory: ../../box-content/Foo.Blabber.Web, type: directory}
     peerDependencies:
       '@box-bottom/web-components': ^0.0.0
-      vue: ^3.5.0
+      vue: ^3.5.41
 
   '@foo/web-hello@file:../../box-content/Foo.Web.Hello':
     resolution: {directory: ../../box-content/Foo.Web.Hello, type: directory}
     peerDependencies:
       '@box-bottom/web-components': ^0.0.0
-      vue: ^3.5.0
+      vue: ^3.5.41
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}

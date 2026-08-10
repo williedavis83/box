@@ -15,6 +15,6 @@
     "@foo/web-test": "file:../../box-content/Foo.Web.Test"
   },
   "peerDependencies": {
-    "vue-router": "^5.0.0"
+    "vue-router": "^5.2.0"
   }
 }

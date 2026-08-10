@@ -14,6 +14,6 @@
     "@foo/web-hello": "file:../../box-content/Foo.Web.Hello"
   },
   "peerDependencies": {
-    "vue-router": "^5.0.0"
+    "vue-router": "^5.2.0"
   }
 }

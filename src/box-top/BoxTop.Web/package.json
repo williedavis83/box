@@ -3,22 +3,22 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@11.5.3",
+  "packageManager": "pnpm@11.21.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@box-bottom/web-components": "file:../../box-bottom/BoxBottom.Web.Components",
-    "@box-pack/users-web": "file:../../box-pack/BoxPack.Users.Web",
-    "@box-pack/web-basics": "file:../../box-pack/BoxPack.Web.Basics",
-    "@box-pack/web-navigation": "file:../../box-pack/BoxPack.Web.Navigation",
-    "vue": "^3.5.35",
-    "vue-router": "^5.1.0"
+    "@box-bottom/web-components": "file:..\\..\\box-bottom\\BoxBottom.Web.Components",
+    "@box-pack/users-web": "file:..\\..\\box-pack\\BoxPack.Users.Web",
+    "@box-pack/web-basics": "file:..\\..\\box-pack\\BoxPack.Web.Basics",
+    "@box-pack/web-navigation": "file:..\\..\\box-pack\\BoxPack.Web.Navigation",
+    "vue": "^3.5.41",
+    "vue-router": "^5.2.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.7",
-    "vite": "^8.0.16"
+    "@vitejs/plugin-vue": "^6.0.8",
+    "vite": "^8.2.1"
   }
 }
